@@ -8,7 +8,7 @@ import 'package:flutter_vpn/state.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -32,47 +32,57 @@ class _MyAppState extends State<MyApp> {
     Icons.power_off,
     size: 100,
   );
+
+  Future<void> init() async {
+    await FlutterVpn.prepare();
+
+    FlutterVpn.onStateChanged.listen(
+      (s) => setState(() {
+        print(s.toString());
+        state = s;
+
+        switch (state) {
+          case FlutterVpnState.disconnected:
+            connected = false;
+            status = 'Отключено';
+            break;
+          case FlutterVpnState.connecting:
+            status = 'Подключение';
+            connected = false;
+            break;
+          case FlutterVpnState.connected:
+            status = 'Подключено';
+            connected = true;
+            break;
+          case FlutterVpnState.disconnecting:
+            connected = true;
+            status = 'Отключение';
+            break;
+
+          case FlutterVpnState.error:
+            status = 'Ошибка';
+            connected = false;
+            break;
+        }
+
+        if (colorflag) {
+          colorflag = false;
+          _color = Colors.blue;
+        } else {
+          _color = Color.fromARGB(255, 10, 69, 117);
+          colorflag = true;
+        }
+      }),
+    );
+
+    //await FlutterVpn.disconnect();
+    setState(() {});
+  }
+
   @override
   void initState() {
-    FlutterVpn.prepare();
-
-    FlutterVpn.onStateChanged.listen((s) => setState(() {
-          state = s;
-          switch (state) {
-            case FlutterVpnState.disconnected:
-              connected = false;
-              status = 'Отключено';
-              break;
-            case FlutterVpnState.connecting:
-              status = 'Подключение';
-              connected = false;
-              break;
-            case FlutterVpnState.connected:
-              status = 'Подключено';
-              connected = true;
-              break;
-            case FlutterVpnState.disconnecting:
-              connected = true;
-              status = 'Отключение';
-              break;
-
-            case FlutterVpnState.error:
-              status = 'Ошибка';
-              connected = false;
-              break;
-          }
-          setState(() {
-            if (colorflag) {
-              colorflag = false;
-              _color = Colors.blue;
-            } else {
-              _color = Color.fromARGB(255, 10, 69, 117);
-              colorflag = true;
-            }
-          });
-        }));
-
     super.initState();
+    init();
   }
 
   @override
