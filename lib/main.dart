@@ -1,24 +1,55 @@
+import 'package:auth_feature/auth_feature.dart';
+import 'package:auth_feature/data/auth_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:go_router/go_router.dart';
+import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/localization/app_localization.dart';
-import 'package:vpn/routes%20/app_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:vpn/theme/app_theme.dart';
+import 'package:vpn/ui/theme/app_theme.dart';
+import 'package:vpn/utils/vpn_bloc/vpn_bloc.dart';
+
+import 'ui/routes /app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
+  final bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
   final String languageCode =
       prefs.getString(AppLocalization.LANGUAGE_CODE) ?? 'ru';
-  runApp(Phoenix(child: MyApp(initialLanguage: languageCode)));
+
+  final router = await AppRouter.initialize();
+  GetIt.I.registerSingleton<AuthService>(AuthService());
+  GetIt.I<AuthService>().user = await GetIt.I<AuthService>().getUser();
+
+  runApp(MultiBlocProvider(
+    providers: [
+      BlocProvider<VpnBloc>(
+        create: (context) => VpnBloc(),
+      ),
+    ],
+    child: Phoenix(
+      child: MyApp(
+        initialLanguage: languageCode,
+        initialRoute: seenOnboarding ? '/' : '/onboarding',
+        router: router,
+      ),
+    ),
+  ));
 }
 
 class MyApp extends StatefulWidget {
   final String initialLanguage;
+  final String initialRoute;
+  final router;
 
-  MyApp({super.key, required this.initialLanguage});
+  MyApp({
+    super.key,
+    required this.initialLanguage,
+    required this.initialRoute,
+    required this.router,
+  });
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -43,9 +74,10 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      // Добавлен оператор return
+      debugShowCheckedModeBanner: false,
+      routerConfig: widget.router,
       locale: Locale(widget.initialLanguage),
-      supportedLocales: [
+      supportedLocales: const [
         Locale('en'),
         Locale('ru'),
       ],
@@ -54,7 +86,6 @@ class _MyAppState extends State<MyApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      routerConfig: appRouter,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
