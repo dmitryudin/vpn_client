@@ -1,33 +1,128 @@
+import 'package:auth_feature/auth_feature.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:vpn/utils/bloc/screen_state_bloc.dart';
 
 class ServerList extends StatefulWidget {
+  final List<String>? servers;
+
+  const ServerList({Key? key, this.servers}) : super(key: key);
+
   @override
   _ServerListState createState() => _ServerListState();
 }
 
 class _ServerListState extends State<ServerList> {
-  String? selectedServer; // Переменная для хранения выбранного сервера
-  final List<String> servers = List.generate(
-      10, (index) => 'Server $index'); // Генерация списка серверов
-
+  String? selectedServer;
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: DropdownButton<String>(
-        value: selectedServer, // Устанавливаем выбранный элемент
-        hint: Text('Выберите сервер'), // Подсказка
-        items: servers.map((server) {
-          return DropdownMenuItem<String>(
-            value: server,
-            child: Text(server),
+      child: BlocBuilder<ScreenStateBloc, ScreenStateState>(
+        builder: (context, state) {
+          switch (state.runtimeType) {
+            case (ScreenStateInitial):
+              {
+                return DropdownButton<String>(
+                  value: selectedServer,
+                  hint: Text('Выберите сервер'),
+                  items: [],
+                  onChanged: (value) {},
+                );
+              }
+            case (ScreenStateError):
+              {
+                return DropdownButton<String>(
+                  value: selectedServer,
+                  hint: Text('Выберите сервер'),
+                  items: [],
+                  onChanged: (value) {},
+                );
+              }
+            case (ScreenStateLoaded):
+              {
+                return DropdownButton<String>(
+                  value: selectedServer,
+                  hint: Text('Выберите сервер'),
+                  items: state.rootModel!.servers?.map((server) {
+                        return DropdownMenuItem<String>(
+                          value: server.id.toString(),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Флаг страны
+                              Container(
+                                margin: EdgeInsets.only(right: 8),
+                                child: Text(
+                                  getCountryFlag(server.country ?? ''),
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(server.name ?? 'No name'),
+                                    Text(
+                                      server.ip ?? '',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // Индикатор нагрузки
+                              Container(
+                                margin: EdgeInsets.only(left: 8),
+                                child: Icon(
+                                  _getLoadIcon(server.load_coef ?? 0),
+                                  color: _getLoadColor(server.load_coef ?? 0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList() ??
+                      [],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedServer = value;
+                    });
+                  },
+                );
+              }
+          }
+          return DropdownButton<String>(
+            value: selectedServer, // Устанавливаем выбранный элемент
+            hint: Text('Выберите сервер'), // Подсказка
+            items: [], onChanged: (value) {},
           );
-        }).toList(),
-        onChanged: (value) {
-          setState(() {
-            selectedServer = value; // Обновляем выбранный элемент
-          });
         },
       ),
     );
   }
+}
+
+IconData _getLoadIcon(double loadCoef) {
+  if (loadCoef < 0.4) return Icons.wifi;
+  if (loadCoef < 0.7) return Icons.wifi_2_bar;
+  return Icons.wifi_1_bar;
+}
+
+Color _getLoadColor(double loadCoef) {
+  if (loadCoef < 0.4) return Colors.green;
+  if (loadCoef < 0.7) return Colors.orange;
+  return Colors.red;
+}
+
+String getCountryFlag(String countryCode) {
+  // Конвертация двухбуквенного кода страны в флаг эмодзи
+  final flag = countryCode.toUpperCase().replaceAllMapped(
+        RegExp(r'[A-Z]'),
+        (match) => String.fromCharCode(match.group(0)!.codeUnitAt(0) + 127397),
+      );
+  return flag;
 }

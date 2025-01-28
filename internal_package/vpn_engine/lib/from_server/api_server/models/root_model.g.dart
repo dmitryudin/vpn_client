@@ -11,6 +11,9 @@ RootHttpModel _$RootHttpModelFromJson(Map<String, dynamic> json) =>
       servers: (json['servers'] as List<dynamic>?)
           ?.map((e) => ServerHttpModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      tariffs: (json['tariffs'] as List<dynamic>)
+          .map((e) => TariffHttpModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
       user_info: json['user_info'] == null
           ? null
           : UserHttpModel.fromJson(json['user_info'] as Map<String, dynamic>),
@@ -19,5 +22,6 @@ RootHttpModel _$RootHttpModelFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$RootHttpModelToJson(RootHttpModel instance) =>
     <String, dynamic>{
       'servers': instance.servers,
+      'tariffs': instance.tariffs,
       'user_info': instance.user_info,
     };

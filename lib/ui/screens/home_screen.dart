@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/ui/widgets/drawers/balance_drawer.dart';
+import 'package:vpn/ui/widgets/drawers/balance_drawer.dart';
 import 'package:vpn/ui/widgets/drawers/profile_drawer.dart';
 import 'package:vpn/ui/widgets/server_list.dart';
 import 'package:vpn/ui/widgets/vpn_button.dart';
@@ -45,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               drawer: ProfileDrawer(email: email),
-              endDrawer: BalanceDrawer(balance: balance),
+              endDrawer: BalanceIndicator(),
               body: SafeArea(
                 child: Column(
                   children: [

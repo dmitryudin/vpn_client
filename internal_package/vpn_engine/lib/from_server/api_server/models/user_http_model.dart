@@ -7,10 +7,8 @@ part 'user_http_model.g.dart';
 class UserHttpModel {
   double? balance;
   bool? is_blocked;
-  UserHttpModel({
-    this.balance,
-    this.is_blocked,
-  });
+  int? current_tarif_id;
+  UserHttpModel({this.balance, this.is_blocked, this.current_tarif_id});
   factory UserHttpModel.fromJson(Map<String, dynamic> json) {
     return _$UserHttpModelFromJson(json);
   }
