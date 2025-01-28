@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/localization/app_localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vpn/ui/theme/app_theme.dart';
+import 'package:vpn/utils/bloc/screen_state_bloc.dart';
 import 'package:vpn/utils/vpn_bloc/vpn_bloc.dart';
 
 import 'ui/routes /app_router.dart';
@@ -21,10 +22,19 @@ void main() async {
 
   final router = await AppRouter.initialize();
   GetIt.I.registerSingleton<AuthService>(AuthService());
+
   GetIt.I<AuthService>().user = await GetIt.I<AuthService>().getUser();
 
   runApp(MultiBlocProvider(
     providers: [
+      BlocProvider<ScreenStateBloc>(
+          lazy: false,
+          create: (context) {
+            ScreenStateBloc screenStateBloc = ScreenStateBloc();
+            screenStateBloc.add(LoadServerList());
+
+            return screenStateBloc;
+          }),
       BlocProvider<VpnBloc>(
         create: (context) => VpnBloc(),
       ),

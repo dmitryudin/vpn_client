@@ -9,7 +9,16 @@ class AuthService {
   UserData user = UserData();
 
   Future<UserData> getUser() async {
-    return await getUserData();
+    try {
+      return await getUserData();
+    } catch (e) {
+      UserData user = UserData();
+      user.authStatus = AuthStatus.unauthorized;
+      user.email = '';
+      user.password = '';
+      user.accessToken = '';
+      return user;
+    }
   }
 
   Future<UserData> loginOffline() async {

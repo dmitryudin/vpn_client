@@ -76,7 +76,8 @@ Future<UserData> getUserData() async {
   user.deviceId = box.get('deviceId');
   user.deviceType = box.get('deviceType');
   user.accessToken = box.get('accessToken');
-  user.authStatus = AuthStatus.values.firstWhere(
-      (e) => e.toString().split('.').last == box.get('auth_status'));
+
+  user.authStatus = AuthStatus.values
+      .firstWhere((e) => e.toString() == box.get('auth_status'));
   return user;
 }

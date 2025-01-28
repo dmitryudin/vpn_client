@@ -175,7 +175,12 @@ class _AuthScreenState extends State<AuthScreen> {
               ],
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _isLoginMode ? _login : _register,
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('seen_onboarding', true);
+
+                  _isLoginMode ? _login() : _register();
+                },
                 child: Text(_isLoginMode ? 'Войти' : 'Зарегистрироваться'),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),

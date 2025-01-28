@@ -11,7 +11,7 @@ Future<Map<String, String>> getDeviceInfo() async {
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfo.androidInfo;
       deviceType = 'android';
-      String deviceModel =
+      deviceId =
           '${androidInfo.manufacturer} ${androidInfo.brand} ${androidInfo.product} ${androidInfo.model}';
     } else if (Platform.isIOS) {
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;

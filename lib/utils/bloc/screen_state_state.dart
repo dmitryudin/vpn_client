@@ -2,18 +2,16 @@ part of 'screen_state_bloc.dart';
 
 @immutable
 sealed class ScreenStateState {
-  final List<ServerInfoModel> servers;
-  final int balance;
+  final RootHttpModel? rootModel;
 
-  const ScreenStateState({this.servers = const [], this.balance = 0});
+  const ScreenStateState({this.rootModel});
 }
 
 class ScreenStateInitial extends ScreenStateState {}
 
 class ScreenStateLoaded extends ScreenStateState {
-  const ScreenStateLoaded(
-      {required List<ServerInfoModel> servers, required int balance})
-      : super(servers: servers, balance: balance);
+  const ScreenStateLoaded({required RootHttpModel rootModel})
+      : super(rootModel: rootModel);
 }
 
 class ScreenStateError extends ScreenStateState {

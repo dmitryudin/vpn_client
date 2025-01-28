@@ -17,6 +17,9 @@ Future<UserData> registerInServer(UserData user, String registerUrl) async {
     print(user.toJson());
     Response response = await Dio().post(registerUrl, data: user.toJson());
     user.accessToken = response.data['access_token'].toString();
+    print(response.data['access_token']);
+    print(user.email);
+    print(user.accessToken);
 
     user.authStatus = AuthStatus.authorized;
 
@@ -73,12 +76,17 @@ Future<UserData> loginInServer(
 
     UserData user = UserData()
       ..password = password
-      ..email = jsonString['email'] ?? ''
+      ..email = jsonString['user']['email'] ?? ''
       ..deviceType = deviceType
       ..deviceId = deviceId
       ..accessToken = jsonString['access_token'] ?? '';
 
     // RSAPublicKey.fromPEM(jsonString['server_rsa_public_key']);
+    user.authStatus = AuthStatus.authorized;
+    print(response.data['access_token']);
+    print(user.email);
+    print(user.accessToken);
+
     user.authStatus = AuthStatus.authorized;
     return user;
   } on DioError catch (_, e) {
