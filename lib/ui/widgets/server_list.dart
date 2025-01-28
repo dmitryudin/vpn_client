@@ -16,6 +16,15 @@ class ServerList extends StatefulWidget {
 class _ServerListState extends State<ServerList> {
   String? selectedServer;
   @override
+  void initState() {
+    super.initState();
+    final state = context.read<ScreenStateBloc>().state;
+    if (state is ScreenStateLoaded) {
+      selectedServer = state.rootModel?.servers?.first.id.toString();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Center(
       child: BlocBuilder<ScreenStateBloc, ScreenStateState>(
@@ -27,7 +36,9 @@ class _ServerListState extends State<ServerList> {
                   value: selectedServer,
                   hint: Text('Выберите сервер'),
                   items: [],
-                  onChanged: (value) {},
+                  onChanged: (value) {
+                    selectedServer = value;
+                  },
                 );
               }
             case (ScreenStateError):
@@ -44,49 +55,49 @@ class _ServerListState extends State<ServerList> {
                 return DropdownButton<String>(
                   value: selectedServer,
                   hint: Text('Выберите сервер'),
+                  isExpanded: true,
                   items: state.rootModel!.servers?.map((server) {
-                        return DropdownMenuItem<String>(
-                          value: server.id.toString(),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Флаг страны
-                              Container(
-                                margin: EdgeInsets.only(right: 8),
-                                child: Text(
-                                  getCountryFlag(server.country ?? ''),
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(server.name ?? 'No name'),
-                                    Text(
-                                      server.ip ?? '',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Индикатор нагрузки
-                              Container(
-                                margin: EdgeInsets.only(left: 8),
-                                child: Icon(
-                                  _getLoadIcon(server.load_coef ?? 0),
-                                  color: _getLoadColor(server.load_coef ?? 0),
-                                ),
-                              ),
-                            ],
+                    return DropdownMenuItem<String>(
+                      value: server.id.toString(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Флаг страны
+                          Container(
+                            margin: EdgeInsets.only(right: 8),
+                            child: Text(
+                              getCountryFlag(server.country ?? ''),
+                              style: TextStyle(fontSize: 20),
+                            ),
                           ),
-                        );
-                      }).toList() ??
-                      [],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(server.name ?? 'No name'),
+                                Text(
+                                  server.ip ?? '',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Индикатор нагрузки
+                          Container(
+                            margin: EdgeInsets.only(left: 8),
+                            child: Icon(
+                              _getLoadIcon(server.load_coef ?? 0),
+                              color: _getLoadColor(server.load_coef ?? 0),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                   onChanged: (value) {
                     setState(() {
                       selectedServer = value;
@@ -98,7 +109,10 @@ class _ServerListState extends State<ServerList> {
           return DropdownButton<String>(
             value: selectedServer, // Устанавливаем выбранный элемент
             hint: Text('Выберите сервер'), // Подсказка
-            items: [], onChanged: (value) {},
+            items: [],
+            onChanged: (value) {
+              selectedServer = value;
+            },
           );
         },
       ),

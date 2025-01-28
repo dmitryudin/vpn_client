@@ -17,7 +17,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String email = '';
 
-  final int balance = 10;
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<SharedPreferences>(

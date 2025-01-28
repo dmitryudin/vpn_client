@@ -19,6 +19,7 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
     return BlocBuilder<ScreenStateBloc, ScreenStateState>(
       builder: (context, state) {
         int balance;
+        int current_tarif_id;
 
         switch (state.runtimeType) {
           case ScreenStateLoaded:
@@ -26,6 +27,15 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
             break;
           default:
             balance = 0;
+        }
+
+        switch (state.runtimeType) {
+          case ScreenStateLoaded:
+            current_tarif_id =
+                ((state.rootModel?.user_info?.current_tarif_id) ?? 0).toInt();
+            break;
+          default:
+            current_tarif_id = 0;
         }
 
         return Drawer(
@@ -59,6 +69,32 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
                       _buildBalanceCircle(balance, colorScheme),
                     ],
                   ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Ваш текущий тариф - ${(() {
+                        switch (current_tarif_id) {
+                          case 0:
+                            return 'Ошибка';
+                          case 1:
+                            return 'Базовый';
+                          case 2:
+                            return 'Премиум';
+                          case 3:
+                            return 'Безлимитный';
+                          default:
+                            return 'Неизвестный тариф';
+                        }
+                      })()}',
+                      style: TextStyle(
+                        color: colorScheme.onPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
                 Expanded(
                   child: _buildMenuSection(colorScheme),
