@@ -14,11 +14,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   String email = '';
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return FutureBuilder<SharedPreferences>(
         future: SharedPreferences.getInstance(),
         builder: (context, snapshot) {
@@ -26,50 +28,70 @@ class _HomeScreenState extends State<HomeScreen> {
             if (email.isEmpty) {
               email = snapshot.data!.getString('user_email') ?? '';
             }
+
             return Scaffold(
               key: _scaffoldKey,
               appBar: AppBar(
+                elevation: 0,
+                backgroundColor: theme.primaryColor,
                 leading: IconButton(
-                  onPressed: () {
-                    _scaffoldKey.currentState?.openDrawer();
-                  },
-                  icon: Icon(Iconsax.arrow_left_2),
+                  onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                  icon: Icon(Iconsax.arrow_left_2,
+                      color: theme.textTheme.bodyLarge?.color),
                 ),
                 actions: [
                   IconButton(
-                    icon: Icon(Iconsax.arrow_right_3),
-                    onPressed: () {
-                      _scaffoldKey.currentState?.openEndDrawer();
-                    },
+                    icon: Icon(Iconsax.arrow_right_3,
+                        color: theme.textTheme.bodyLarge?.color),
+                    onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
                   ),
                 ],
               ),
               drawer: ProfileDrawer(email: email),
               endDrawer: BalanceIndicator(),
-              body: SafeArea(
-                child: Column(
-                  children: [
-                    SizedBox(height: 40),
-                    Expanded(
-                      child: Center(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              VpnButton(),
-                              SizedBox(height: 20),
-                              ServerList(),
-                            ],
+              body: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.scaffoldBackgroundColor,
+                      theme.cardColor,
+                    ],
+                  ),
+                ),
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Center(
+                          child: SingleChildScrollView(
+                            physics: BouncingScrollPhysics(),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  VpnButton(),
+                                  SizedBox(height: 30),
+                                  ServerList(),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
           }
-          return CircularProgressIndicator();
+          return Center(
+            child: CircularProgressIndicator(
+              color: theme.primaryColor,
+            ),
+          );
         });
   }
 }

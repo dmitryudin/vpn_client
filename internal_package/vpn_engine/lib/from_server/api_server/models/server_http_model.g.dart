@@ -15,6 +15,7 @@ ServerHttpModel _$ServerHttpModelFromJson(Map<String, dynamic> json) =>
       username: json['username'] as String?,
       country: json['country'] as String?,
       load_coef: (json['load_coef'] as num?)?.toDouble(),
+      password: json['password'] as String?,
     );
 
 Map<String, dynamic> _$ServerHttpModelToJson(ServerHttpModel instance) =>
@@ -26,4 +27,5 @@ Map<String, dynamic> _$ServerHttpModelToJson(ServerHttpModel instance) =>
       'username': instance.username,
       'country': instance.country,
       'load_coef': instance.load_coef,
+      'password': instance.password,
     };

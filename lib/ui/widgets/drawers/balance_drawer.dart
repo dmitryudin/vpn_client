@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../utils/bloc/screen_state_bloc.dart';
 
@@ -11,6 +12,9 @@ class BalanceIndicator extends StatefulWidget {
 }
 
 class _BalanceIndicatorState extends State<BalanceIndicator> {
+  bool _isExpanded = false;
+  String? _description;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -20,6 +24,7 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
       builder: (context, state) {
         int balance;
         int current_tarif_id;
+        String name = '';
 
         switch (state.runtimeType) {
           case ScreenStateLoaded:
@@ -37,6 +42,26 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
           default:
             current_tarif_id = 0;
         }
+        switch (state.runtimeType) {
+          case ScreenStateLoaded:
+            name = ((state.rootModel?.tariffs
+                        .firstWhere((e) => e.id == current_tarif_id)
+                        .name) ??
+                    0)
+                .toString();
+            break;
+          default:
+        }
+        switch (state.runtimeType) {
+          case ScreenStateLoaded:
+            name = ((state.rootModel?.tariffs
+                        .firstWhere((e) => e.id == current_tarif_id)
+                        .name) ??
+                    0)
+                .toString();
+            break;
+          default:
+        }
 
         return Drawer(
           child: Container(
@@ -45,8 +70,8 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  colorScheme.primaryContainer,
-                  colorScheme.secondaryContainer,
+                  theme.primaryColor,
+                  theme.cardColor,
                 ],
               ),
             ),
@@ -59,7 +84,7 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
                       Text(
                         'Баланс',
                         style: TextStyle(
-                          color: colorScheme.onPrimary,
+                          color: theme.textTheme.bodyLarge?.color,
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
@@ -73,27 +98,51 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      'Ваш текущий тариф - ${(() {
-                        switch (current_tarif_id) {
-                          case 0:
-                            return 'Ошибка';
-                          case 1:
-                            return 'Базовый';
-                          case 2:
-                            return 'Премиум';
-                          case 3:
-                            return 'Безлимитный';
-                          default:
-                            return 'Неизвестный тариф';
-                        }
-                      })()}',
-                      style: TextStyle(
-                        color: colorScheme.onPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Ваш тариф: $name',
+                          style: TextStyle(
+                            color: theme.textTheme.bodyLarge?.color,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _isExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: colorScheme.onSurface,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isExpanded = !_isExpanded;
+                              if (_isExpanded) {
+                                _description = state.rootModel?.tariffs
+                                    .firstWhere((t) => t.id == current_tarif_id)
+                                    .descryption;
+                              }
+                            });
+                          },
+                        ),
+                      ],
                     ),
+                    if (_isExpanded && _description != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
+                        child: Text(
+                          _description!,
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                   ],
                 ),
                 Expanded(
@@ -128,7 +177,7 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
             width: 180,
             height: 180,
             child: CircularProgressIndicator(
-              value: balance / 10,
+              value: balance / 30,
               strokeWidth: 15,
               backgroundColor: colorScheme.onPrimary.withOpacity(0.24),
               valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
@@ -173,8 +222,8 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
         children: [
           _buildMenuItem(
             icon: Icons.shopping_cart,
-            title: 'Купить безлимитную подписку',
-            onTap: () {},
+            title: 'Сменить тариф',
+            onTap: () => context.push('/tariff'),
             colorScheme: colorScheme,
           ),
           _buildMenuItem(
@@ -186,7 +235,7 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
           _buildMenuItem(
             icon: Icons.person_add,
             title: 'Пригласить друга 5 дней',
-            onTap: () {},
+            onTap: () => context.push('/invite'),
             colorScheme: colorScheme,
           ),
         ],

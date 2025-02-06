@@ -23,8 +23,8 @@ class ProfileDrawer extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              colorScheme.primaryContainer,
-              colorScheme.secondaryContainer,
+              theme.primaryColor,
+              theme.cardColor,
             ],
           ),
         ),
@@ -39,30 +39,30 @@ class ProfileDrawer extends StatelessWidget {
                     backgroundColor: colorScheme.onPrimary,
                     child: isAuthorized
                         ? Text(
-                            email![0].toUpperCase(),
+                            email[0].toUpperCase(),
                             style: textTheme.bodyLarge?.copyWith(
                               fontSize: 32,
-                              color: colorScheme.primary,
+                              color: theme.focusColor,
                               fontWeight: FontWeight.bold,
                             ),
                           )
                         : Icon(Iconsax.profile_circle,
-                            size: 50, color: colorScheme.primary),
+                            size: 50, color: theme.scaffoldBackgroundColor),
                   ),
                   SizedBox(height: 20),
                   if (isAuthorized) ...[
                     Text(
                       'Ваша почта:',
                       style: textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onPrimary.withOpacity(0.7),
+                        color: theme.focusColor.withOpacity(0.7),
                         fontSize: 16,
                       ),
                     ),
                     SizedBox(height: 8),
                     Text(
-                      email!,
+                      email,
                       style: textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onPrimary,
+                        color: theme.focusColor,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),

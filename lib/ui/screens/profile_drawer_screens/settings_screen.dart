@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/localization/app_localization.dart';
 
@@ -41,12 +42,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _changeLanguage(String? newLanguage) async {
     if (newLanguage != null) {
+      final prefs = await SharedPreferences.getInstance();
+      String languageCode = newLanguage == 'English' ? 'en' : 'ru';
+      // Сохраняем язык
+      await prefs.setString(AppLocalization.LANGUAGE_CODE, languageCode);
       setState(() {
         selectedLanguage = newLanguage;
       });
-      String languageCode = newLanguage == 'English' ? 'en' : 'ru';
-      await AppLocalization.setLanguage(languageCode);
-      Phoenix.rebirth(context);
+      // Перезапускаем приложение
+      if (mounted) {
+        Phoenix.rebirth(context);
+      }
     }
   }
 
@@ -67,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Настройки',
+          AppLocalization.translate('settings', 'ru'),
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: colorScheme.onPrimary,
@@ -79,7 +85,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           icon: AnimatedRotation(
             duration: Duration(milliseconds: 300),
             turns: isExpanded ? 0.5 : 0,
-            child: Icon(Icons.arrow_downward, color: colorScheme.onPrimary),
+            child: Icon(Icons.keyboard_arrow_down_outlined,
+                color: colorScheme.onPrimary),
           ),
           onPressed: () {
             setState(() {
@@ -104,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: EdgeInsets.all(16),
           children: [
             _buildSettingsCard(
-              'Язык',
+              AppLocalization.translate('language', 'ru'),
               DropdownButton<String>(
                 value: selectedLanguage,
                 items: languages.map((String value) {

@@ -16,9 +16,9 @@ import 'ui/routes /app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
-  final bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
   final String languageCode =
       prefs.getString(AppLocalization.LANGUAGE_CODE) ?? 'ru';
+  final bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
 
   final router = await AppRouter.initialize();
   GetIt.I.registerSingleton<AuthService>(AuthService());
@@ -32,7 +32,6 @@ void main() async {
           create: (context) {
             ScreenStateBloc screenStateBloc = ScreenStateBloc();
             screenStateBloc.add(LoadServerList());
-
             return screenStateBloc;
           }),
       BlocProvider<VpnBloc>(

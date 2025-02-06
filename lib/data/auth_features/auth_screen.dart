@@ -18,6 +18,8 @@ class _AuthScreenState extends State<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _inviteCodeController = TextEditingController();
+
   bool _isRegistered = false;
   bool _isLoginMode = false;
 
@@ -41,11 +43,14 @@ class _AuthScreenState extends State<AuthScreen> {
       UserData userData = UserData()
         ..email = _emailController.text
         ..password = _passwordController.text
+        ..inviteCode = _inviteCodeController.text
         ..deviceType = deviceInfo['deviceType'] ?? ''
         ..deviceId = deviceInfo['deviceId'] ?? '';
+
       AuthStatus status = await widget.authModule.authService.register(
           userData: userData,
           registerUrl: 'http://109.196.101.63:8000/api/register/');
+
       if (status == AuthStatus.authorized) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('is_registered', true);
@@ -85,6 +90,17 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() {
       _isLoginMode = !_isLoginMode;
     });
+  }
+
+  String? _validateInviteCode(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Введите инвайт код';
+    }
+    final inviteCodeRegExp = RegExp(r'^[0-9]{6}$');
+    if (!inviteCodeRegExp.hasMatch(value)) {
+      return 'Код должен состоять из 6 цифр';
+    }
+    return null;
   }
 
   String? _validateEmail(String? value) {
@@ -171,6 +187,16 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                   obscureText: true,
                   validator: _validateConfirmPassword,
+                ),
+                SizedBox(height: 20),
+                TextFormField(
+                  controller: _inviteCodeController,
+                  decoration: InputDecoration(
+                    labelText: 'Инвайт код',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: _validateInviteCode,
                 ),
               ],
               SizedBox(height: 20),
