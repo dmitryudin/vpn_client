@@ -4,6 +4,7 @@ import 'package:flutter_vpn/state.dart';
 import 'package:vpn/utils/vpn_bloc/vpn_bloc.dart';
 import 'package:vpn/utils/vpn_bloc/vpn_event.dart';
 import 'package:vpn/utils/vpn_bloc/vpn_state.dart';
+import 'package:yandex_mobileads/mobile_ads.dart';
 
 class VpnButton extends StatefulWidget {
   @override
@@ -83,7 +84,28 @@ class _VpnButtonState extends State<VpnButton>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: () {
+              onTap: () async {
+                // await Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //         builder: (context) => Scaffold(
+                //               body: Align(
+                //                 alignment: Alignment.bottomCenter,
+                //                 child: AdWidget(
+                //                     bannerAd: BannerAd(
+                //                         adUnitId: 'R-M-13885939-1',
+                //                         adSize: BannerAdSize.inline(
+                //                             width: MediaQuery.of(context)
+                //                                 .size
+                //                                 .width
+                //                                 .toInt(),
+                //                             maxHeight: MediaQuery.of(context)
+                //                                 .size
+                //                                 .height
+                //                                 .toInt()))),
+                //               ),
+                //             )));
+
                 if (state.connectionState == FlutterVpnState.disconnected) {
                   context.read<VpnBloc>().add(ConnectVpn());
                 } else if (state.connectionState == FlutterVpnState.connected ||

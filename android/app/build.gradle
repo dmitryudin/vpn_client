@@ -5,6 +5,13 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+dependencies {
+    // ...
+    implementation 'com.yandex.android:mobileads:7.9.0'
+    // implementation 'com.yandex.android:mobileads-mediation:7.9.0.0'
+    // implementation 'com.yandex.ads.adapter:admob-mobileads:7.9.0.0'
+}
+
 
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')

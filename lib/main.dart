@@ -10,6 +10,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vpn/ui/theme/app_theme.dart';
 import 'package:vpn/utils/bloc/screen_state_bloc.dart';
 import 'package:vpn/utils/vpn_bloc/vpn_bloc.dart';
+import 'package:yandex_mobileads/mobile_ads.dart';
 
 import 'ui/routes /app_router.dart';
 
@@ -71,6 +72,10 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+
+    // Configure the user privacy data policy before init sdk
+    MobileAds.initialize();
+
     _loadThemeMode();
   }
 
