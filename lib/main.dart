@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get_it/get_it.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/localization/app_localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -17,9 +18,9 @@ import 'ui/routes /app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
-  final bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
   final String languageCode =
       prefs.getString(AppLocalization.LANGUAGE_CODE) ?? 'ru';
+  final bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
 
   final router = await AppRouter.initialize();
   GetIt.I.registerSingleton<AuthService>(AuthService());
@@ -33,7 +34,6 @@ void main() async {
           create: (context) {
             ScreenStateBloc screenStateBloc = ScreenStateBloc();
             screenStateBloc.add(LoadServerList());
-
             return screenStateBloc;
           }),
       BlocProvider<VpnBloc>(

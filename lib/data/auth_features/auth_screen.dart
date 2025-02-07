@@ -2,9 +2,11 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:auth_feature/data/auth_data.dart';
 import 'package:auth_feature/data/device_info.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/data/auth_features/auth_module.dart';
+import 'package:vpn/utils/bloc/screen_state_bloc.dart';
 
 class AuthScreen extends StatefulWidget {
   final AuthModule authModule = AuthModule();
@@ -18,6 +20,8 @@ class _AuthScreenState extends State<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _inviteCodeController = TextEditingController();
+
   bool _isRegistered = false;
   bool _isLoginMode = false;
 
@@ -41,16 +45,20 @@ class _AuthScreenState extends State<AuthScreen> {
       UserData userData = UserData()
         ..email = _emailController.text
         ..password = _passwordController.text
+        ..inviteCode = _inviteCodeController.text
         ..deviceType = deviceInfo['deviceType'] ?? ''
         ..deviceId = deviceInfo['deviceId'] ?? '';
+
       AuthStatus status = await widget.authModule.authService.register(
           userData: userData,
           registerUrl: 'http://109.196.101.63:8000/api/register/');
+
       if (status == AuthStatus.authorized) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('is_registered', true);
         await prefs.setString('user_email', _emailController.text);
         if (mounted) {
+          BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
           context.go('/');
         }
       }
@@ -75,6 +83,7 @@ class _AuthScreenState extends State<AuthScreen> {
         await prefs.setBool('is_registered', true);
         await prefs.setString('user_email', _emailController.text);
         if (mounted) {
+          BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
           context.go('/');
         }
       }
@@ -85,6 +94,16 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() {
       _isLoginMode = !_isLoginMode;
     });
+  }
+
+  String? _validateInviteCode(String? value) {
+    if ((value ?? '').length > 0) {
+      final inviteCodeRegExp = RegExp(r'^[0-9]{6}$');
+      if (!inviteCodeRegExp.hasMatch(value ?? '')) {
+        return 'Код должен состоять из 6 цифр';
+      }
+    }
+    return null;
   }
 
   String? _validateEmail(String? value) {
@@ -125,74 +144,89 @@ class _AuthScreenState extends State<AuthScreen> {
         padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: ListView(
             children: [
-              AnimatedTextKit(
-                animatedTexts: [
-                  TyperAnimatedText(
-                    _isLoginMode
-                        ? 'Добро пожаловать обратно!'
-                        : 'Создайте аккаунт',
-                    textStyle: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedTextKit(
+                    animatedTexts: [
+                      TyperAnimatedText(
+                        _isLoginMode
+                            ? 'Добро пожаловать обратно!'
+                            : 'Создайте аккаунт',
+                        textStyle: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        speed: Duration(milliseconds: 100),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
                     ),
-                    speed: Duration(milliseconds: 100),
+                    validator: _validateEmail,
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Пароль',
+                      border: OutlineInputBorder(),
+                    ),
+                    obscureText: true,
+                    validator: _validatePassword,
+                  ),
+                  if (!_isLoginMode) ...[
+                    SizedBox(height: 20),
+                    TextFormField(
+                      controller: _confirmPasswordController,
+                      decoration: InputDecoration(
+                        labelText: 'Повторите пароль',
+                        border: OutlineInputBorder(),
+                      ),
+                      obscureText: true,
+                      validator: _validateConfirmPassword,
+                    ),
+                    SizedBox(height: 20),
+                    TextFormField(
+                      controller: _inviteCodeController,
+                      decoration: InputDecoration(
+                        labelText: 'Инвайт код',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: _validateInviteCode,
+                    ),
+                  ],
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('seen_onboarding', true);
+
+                      _isLoginMode ? _login() : _register();
+                    },
+                    child: Text(_isLoginMode ? 'Войти' : 'Зарегистрироваться'),
+                    style: ElevatedButton.styleFrom(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _toggleMode,
+                    child: Text(
+                        _isLoginMode ? 'Создать аккаунт' : 'Уже есть аккаунт'),
                   ),
                 ],
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-                validator: _validateEmail,
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Пароль',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-                validator: _validatePassword,
-              ),
-              if (!_isLoginMode) ...[
-                SizedBox(height: 20),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  decoration: InputDecoration(
-                    labelText: 'Повторите пароль',
-                    border: OutlineInputBorder(),
-                  ),
-                  obscureText: true,
-                  validator: _validateConfirmPassword,
-                ),
-              ],
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('seen_onboarding', true);
-
-                  _isLoginMode ? _login() : _register();
-                },
-                child: Text(_isLoginMode ? 'Войти' : 'Зарегистрироваться'),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: _toggleMode,
-                child:
-                    Text(_isLoginMode ? 'Создать аккаунт' : 'Уже есть аккаунт'),
               ),
             ],
           ),

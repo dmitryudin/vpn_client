@@ -23,6 +23,8 @@ class UserData {
   String deviceType = '';
   String accessToken = '';
   String deviceId = '';
+  String inviteCode = '';
+
   AuthStatus authStatus = AuthStatus.unauthorized;
 
   Map<String, dynamic> toMap() {
@@ -31,6 +33,7 @@ class UserData {
       'email': email,
       'device_type': deviceType,
       'device_id': deviceId,
+      'invite_code': inviteCode,
     };
   }
 

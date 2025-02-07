@@ -6,15 +6,18 @@ part 'tariff_http_model.g.dart';
 @JsonSerializable()
 class TariffHttpModel {
   int? id;
+  String? name;
   String? descryption;
-  double? cost_in_day;
+  double? days;
+  double? cost;
   int? max_number_of_devices;
-  TariffHttpModel({
-    this.id,
-    this.descryption,
-    this.cost_in_day,
-    this.max_number_of_devices,
-  });
+  TariffHttpModel(
+      {this.id,
+      this.descryption,
+      this.days,
+      this.cost,
+      this.max_number_of_devices,
+      this.name});
 
   factory TariffHttpModel.fromJson(Map<String, dynamic> json) {
     return _$TariffHttpModelFromJson(json);

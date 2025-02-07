@@ -6,8 +6,7 @@ part of 'server_http_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ServerHttpModel _$ServerHttpModelFromJson(Map<String, dynamic> json) =>
-    ServerHttpModel(
+ServerHttpModel _$ServerHttpModelFromJson(Map json) => ServerHttpModel(
       id: (json['id'] as num?)?.toInt(),
       name: json['name'] as String?,
       url: json['url'] as String?,
@@ -15,6 +14,7 @@ ServerHttpModel _$ServerHttpModelFromJson(Map<String, dynamic> json) =>
       username: json['username'] as String?,
       country: json['country'] as String?,
       load_coef: (json['load_coef'] as num?)?.toDouble(),
+      password: json['password'] as String?,
     );
 
 Map<String, dynamic> _$ServerHttpModelToJson(ServerHttpModel instance) =>
@@ -26,4 +26,5 @@ Map<String, dynamic> _$ServerHttpModelToJson(ServerHttpModel instance) =>
       'username': instance.username,
       'country': instance.country,
       'load_coef': instance.load_coef,
+      'password': instance.password,
     };

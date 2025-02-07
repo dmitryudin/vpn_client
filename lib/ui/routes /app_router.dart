@@ -2,8 +2,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vpn/ui/screens/balance_drawer_screens/change_tariff_screen.dart';
 
 import '../../data/auth_features/auth_screen.dart';
+import '../screens/balance_drawer_screens/invite_friend_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/onboarding_screens/onboarding_screen.dart';
 import '../screens/profile_drawer_screens/settings_screen.dart';
@@ -35,6 +37,42 @@ class AppRouter {
           path: '/settings',
           pageBuilder: (context, state) => CustomTransitionPage(
             child: SettingsScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              final tween = Tween(
+                begin: const Offset(0.0, 1.0),
+                end: Offset.zero,
+              ).chain(CurveTween(curve: Curves.easeInOut));
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+          ),
+        ),
+        GoRoute(
+          path: '/tariff',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            child: ChangeTariffScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              final tween = Tween(
+                begin: const Offset(0.0, 1.0),
+                end: Offset.zero,
+              ).chain(CurveTween(curve: Curves.easeInOut));
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+          ),
+        ),
+        GoRoute(
+          path: '/invite',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            child: InviteFriendScreen(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               final tween = Tween(

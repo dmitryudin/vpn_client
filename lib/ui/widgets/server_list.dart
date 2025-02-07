@@ -1,8 +1,14 @@
 import 'package:auth_feature/auth_feature.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_vpn/state.dart';
 import 'package:get_it/get_it.dart';
 import 'package:vpn/utils/bloc/screen_state_bloc.dart';
+import 'package:vpn/utils/vpn_bloc/vpn_bloc.dart';
+import 'package:vpn/utils/vpn_bloc/vpn_event.dart';
+import 'package:vpn_engine/from_server/api_server/models/server_http_model.dart';
+
+import '../../utils/vpn_bloc/vpn_state.dart';
 
 class ServerList extends StatefulWidget {
   final List<String>? servers;
@@ -18,29 +24,35 @@ class _ServerListState extends State<ServerList> {
   @override
   void initState() {
     super.initState();
-    final state = context.read<ScreenStateBloc>().state;
-    if (state is ScreenStateLoaded) {
-      selectedServer = state.rootModel?.servers?.first.id.toString();
-    }
+    context.read<ScreenStateBloc>().add(LoadServerList());
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: BlocBuilder<ScreenStateBloc, ScreenStateState>(
+    return Center(child: BlocBuilder<ScreenStateBloc, ScreenStateState>(
         builder: (context, state) {
+      return BlocBuilder<VpnBloc, VpnState>(
+        builder: (context, vpnState) {
+          bool isEnabled =
+              vpnState.connectionState != FlutterVpnState.connected;
+          if (state is ScreenStateLoaded &&
+              state.rootModel?.servers?.isNotEmpty == true) {
+            selectedServer ??= state.rootModel?.servers?.first.id.toString();
+            if (BlocProvider.of<VpnBloc>(context).currentServer == null) {
+              ServerHttpModel? tempServerHttpModel =
+                  state.rootModel?.servers?.first;
+              if (tempServerHttpModel != null) {
+                BlocProvider.of<VpnBloc>(context).currentServer = CurrentServer(
+                    host: tempServerHttpModel.url!,
+                    userName: tempServerHttpModel.username!,
+                    password: tempServerHttpModel.password!);
+              }
+            }
+          }
           switch (state.runtimeType) {
             case (ScreenStateInitial):
-              {
-                return DropdownButton<String>(
-                  value: selectedServer,
-                  hint: Text('Выберите сервер'),
-                  items: [],
-                  onChanged: (value) {
-                    selectedServer = value;
-                  },
-                );
-              }
+              return const Center(child: CircularProgressIndicator());
+
             case (ScreenStateError):
               {
                 return DropdownButton<String>(
@@ -98,11 +110,20 @@ class _ServerListState extends State<ServerList> {
                       ),
                     );
                   }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedServer = value;
-                    });
-                  },
+                  onChanged: isEnabled
+                      ? (value) {
+                          final server = state.rootModel?.servers?.firstWhere(
+                              (element) => element.id.toString() == value);
+                          BlocProvider.of<VpnBloc>(context).add(
+                              ChangeServerEvent(
+                                  host: server!.url ?? '',
+                                  userName: server.username ?? '',
+                                  password: server.password ?? ''));
+                          setState(() {
+                            selectedServer = value;
+                          });
+                        }
+                      : null,
                 );
               }
           }
@@ -115,8 +136,8 @@ class _ServerListState extends State<ServerList> {
             },
           );
         },
-      ),
-    );
+      );
+    }));
   }
 }
 

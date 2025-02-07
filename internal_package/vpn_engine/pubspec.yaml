@@ -38,6 +38,8 @@ dependencies:
   shared_preferences: ^2.4.0
   json_serializable: any
   build_runner: any
+  hive: any
+  hive_flutter: any
   
 
 

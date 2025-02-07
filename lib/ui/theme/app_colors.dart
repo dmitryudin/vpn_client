@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static final light = _LightColors();
-  static final dark = _DarkColors();
+  static final light = LightColors();
+  static final dark = DarkColors();
 }
 
-class _LightColors {
-  final primary = const Color(0xFF007AFF); // iOS blue
-  final background = const Color(0xFFF2F2F7); // iOS light background
+class LightColors {
+  // Основные цвета в стиле Apple Light
+  final primary = const Color.fromARGB(255, 255, 255, 255); // iOS синий
+  final background = const Color(0xFFF2F2F7); // iOS светлый фон
   final cardBackground = Colors.white;
-  final textPrimary = const Color(0xFF000000);
-  final textSecondary = const Color(0xFF8E8E93);
-  final divider = const Color(0xFFC6C6C8);
+  final textPrimary = const Color(0xFF000000); // Чёрный текст
+  final textSecondary = const Color(0xFF8E8E93); // Серый текст
+  final divider = const Color(0xFFC6C6C8); // Разделитель
 }
 
-class _DarkColors {
-  final primary = const Color(0xFF0A84FF); // iOS dark mode blue
-  final background = const Color(0xFF000000);
-  final cardBackground = const Color(0xFF1C1C1E);
-  final textPrimary = Colors.white;
-  final textSecondary = const Color(0xFF8E8E93);
-  final divider = const Color(0xFF38383A);
+class DarkColors {
+  // Основные цвета в стиле Apple Dark
+  final primary = const Color(0xFF0A84FF); // iOS тёмно-синий
+  final background = const Color(0xFF000000); // Чёрный фон
+  final cardBackground = const Color(0xFF1C1C1E); // Тёмные карточки
+  final textPrimary = Colors.white; // Белый текст
+  final textSecondary = const Color(0xFF8E8E93); // Серый текст
+  final divider = const Color(0xFF38383A); // Тёмный разделитель
 }

@@ -79,7 +79,6 @@ class _VpnButtonState extends State<VpnButton>
         _colortap = state.connectionState == FlutterVpnState.connected
             ? const Color.fromARGB(255, 118, 16, 134)
             : Colors.grey;
-
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

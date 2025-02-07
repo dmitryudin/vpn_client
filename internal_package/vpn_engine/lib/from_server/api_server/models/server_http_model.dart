@@ -12,6 +12,7 @@ class ServerHttpModel {
   String? username;
   String? country;
   double? load_coef;
+  String? password;
   ServerHttpModel({
     this.id,
     this.name,
@@ -20,6 +21,7 @@ class ServerHttpModel {
     this.username,
     this.country,
     this.load_coef,
+    this.password,
   });
 
   factory ServerHttpModel.fromJson(Map<String, dynamic> json) {

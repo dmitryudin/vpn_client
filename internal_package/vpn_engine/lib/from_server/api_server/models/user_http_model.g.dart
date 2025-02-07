@@ -6,8 +6,7 @@ part of 'user_http_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-UserHttpModel _$UserHttpModelFromJson(Map<String, dynamic> json) =>
-    UserHttpModel(
+UserHttpModel _$UserHttpModelFromJson(Map json) => UserHttpModel(
       balance: (json['balance'] as num?)?.toDouble(),
       is_blocked: json['is_blocked'] as bool?,
       current_tarif_id: (json['current_tarif_id'] as num?)?.toInt(),
