@@ -328,8 +328,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: "802fba1a9d5c7181afc81785d90101e29eebfdd7"
+      ref: mybr
+      resolved-ref: "25357b2011000cec313c031b24b57893c8986f36"
       url: "https://github.com/dmitryudin/flutter_vpn.git"
     source: git
     version: "0.13.0"
