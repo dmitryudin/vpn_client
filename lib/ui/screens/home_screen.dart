@@ -1,20 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:system_tray/system_tray.dart';
 import 'package:vpn/ui/widgets/drawers/balance_drawer.dart';
 import 'package:vpn/ui/widgets/drawers/balance_drawer.dart';
 import 'package:vpn/ui/widgets/drawers/profile_drawer.dart';
 import 'package:vpn/ui/widgets/server_list.dart';
 import 'package:vpn/ui/widgets/vpn_button.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:window_manager/window_manager.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WindowListener {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String email = '';
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    windowManager.addListener(this);
+  }
+
+  @override
+  void onWindowMinimize() {
+    // TODO: implement onWindowMinimize
+    super.onWindowMinimize();
+    print('minimize');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +78,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: SafeArea(
                   child: Column(
                     children: [
+                      ElevatedButton(
+                          onPressed: () async {
+                            AppWindow appWindow = AppWindow();
+                            await appWindow.hide();
+                          },
+                          child: Text('Minimize Me')),
                       Expanded(
                         child: Center(
                           child: SingleChildScrollView(
