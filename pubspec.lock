@@ -329,7 +329,7 @@ packages:
     description:
       path: "."
       ref: mybr
-      resolved-ref: "25357b2011000cec313c031b24b57893c8986f36"
+      resolved-ref: bb191b5fceaaad9cfdb4df892a233492f3bba728
       url: "https://github.com/dmitryudin/flutter_vpn.git"
     source: git
     version: "0.13.0"
