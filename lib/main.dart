@@ -12,53 +12,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:vpn/localization/app_localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:vpn/ui/theme/app_theme.dart';
-import 'package:vpn/utils/bloc/screen_state_bloc.dart';
-import 'package:vpn/utils/vpn_bloc/vpn_bloc.dart';
-import 'package:vpn/utils/vpn_bloc/vpn_state.dart';
+import 'package:vpn/mobile/ui/theme/app_theme.dart';
+import 'package:vpn/mobile/utils/bloc/screen_state_bloc.dart';
+import 'package:vpn/mobile/utils/vpn_bloc/vpn_bloc.dart';
+import 'package:vpn/mobile/utils/vpn_bloc/vpn_state.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 
-import 'ui/routes /app_router.dart';
-
-String getTrayImagePath(String imageName) {
-  return Platform.isMacOS
-      ? 'assets/icons/$imageName.png'
-      : 'assets/icons/$imageName.png';
-}
-
-Future<void> initSystemTray() async {
-  List<String> iconList = ['darts_icon', 'gift_icon'];
-  final SystemTray systemTray = SystemTray();
-  // We first init the systray menu and then add the menu entries
-  await systemTray.initSystemTray(iconPath: getTrayImagePath('connected'));
-  systemTray.setTitle("crypton");
-  systemTray.setToolTip("How to use system tray with Flutter");
-  final Menu menu = Menu();
-  await menu.buildFrom([
-    MenuItemLabel(
-        label: 'Выход', onClicked: (menuItem) => windowManager.destroy()),
-  ]);
-
-  // set context menu
-  await systemTray.setContextMenu(menu);
-
-  // handle system tray event
-  systemTray.registerSystemTrayEventHandler((eventName) {
-    debugPrint("eventName: $eventName");
-    if (eventName == kSystemTrayEventClick) {
-      if (Platform.isMacOS) AppWindow().show();
-    } else if (eventName == kSystemTrayEventRightClick) {
-      if (Platform.isMacOS) systemTray.popUpContextMenu();
-    }
-  });
-}
+import 'mobile/ui/routes /app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
-
-  await initSystemTray();
+  await MobileAds.initialize();
   final prefs = await SharedPreferences.getInstance();
   final String languageCode =
       prefs.getString(AppLocalization.LANGUAGE_CODE) ?? 'ru';
@@ -132,27 +97,29 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return BlocListener<VpnBloc, VpnState>(
       listener: (context, state) {
-        switch (state.connectionState) {
-          case FlutterVpnState.disconnected:
-            SystemTray().setSystemTrayInfo(
-                title: 'Отключено', iconPath: 'assets/icons/pixel.png');
-            break;
-          case FlutterVpnState.connecting:
-            SystemTray().setSystemTrayInfo(
-                title: 'Подключение', iconPath: 'assets/icons/image.gif');
-            break;
-          case FlutterVpnState.connected:
-            SystemTray().setSystemTrayInfo(
-                title: 'Подключено', iconPath: 'assets/icons/connected.png');
-            break;
-          case FlutterVpnState.disconnecting:
-            SystemTray().setSystemTrayInfo(
-                title: 'Отключено', iconPath: 'assets/icons/pixel.png');
-            break;
-          case FlutterVpnState.error:
-            SystemTray().setSystemTrayInfo(
-                title: 'Ошибка', iconPath: 'assets/icons/pixel.png');
-            break;
+        if (Platform.isMacOS) {
+          switch (state.connectionState) {
+            case FlutterVpnState.disconnected:
+              SystemTray().setSystemTrayInfo(
+                  title: 'Отключено', iconPath: 'assets/icons/pixel.png');
+              break;
+            case FlutterVpnState.connecting:
+              SystemTray().setSystemTrayInfo(
+                  title: 'Подключение', iconPath: 'assets/icons/image.gif');
+              break;
+            case FlutterVpnState.connected:
+              SystemTray().setSystemTrayInfo(
+                  title: 'Подключено', iconPath: 'assets/icons/connected.png');
+              break;
+            case FlutterVpnState.disconnecting:
+              SystemTray().setSystemTrayInfo(
+                  title: 'Отключено', iconPath: 'assets/icons/pixel.png');
+              break;
+            case FlutterVpnState.error:
+              SystemTray().setSystemTrayInfo(
+                  title: 'Ошибка', iconPath: 'assets/icons/pixel.png');
+              break;
+          }
         }
         // TODO: implement listener
       },

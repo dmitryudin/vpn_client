@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vpn/data/auth_features/auth_module.dart';
-import 'package:vpn/utils/bloc/screen_state_bloc.dart';
+import 'package:vpn/mobile/data/auth_features/auth_module.dart';
+import 'package:vpn/mobile/utils/bloc/screen_state_bloc.dart';
 
 class AuthScreen extends StatefulWidget {
   final AuthModule authModule = AuthModule();

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vpn/state.dart';
 import 'package:get_it/get_it.dart';
-import 'package:vpn/utils/bloc/screen_state_bloc.dart';
-import 'package:vpn/utils/vpn_bloc/vpn_bloc.dart';
-import 'package:vpn/utils/vpn_bloc/vpn_event.dart';
+import 'package:vpn/mobile/utils/bloc/screen_state_bloc.dart';
+import 'package:vpn/mobile/utils/vpn_bloc/vpn_bloc.dart';
+import 'package:vpn/mobile/utils/vpn_bloc/vpn_event.dart';
 import 'package:vpn_engine/from_server/api_server/models/server_http_model.dart';
 
 import '../../utils/vpn_bloc/vpn_state.dart';

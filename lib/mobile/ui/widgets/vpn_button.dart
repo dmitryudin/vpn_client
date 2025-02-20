@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vpn/state.dart';
-import 'package:vpn/utils/vpn_bloc/vpn_bloc.dart';
-import 'package:vpn/utils/vpn_bloc/vpn_event.dart';
-import 'package:vpn/utils/vpn_bloc/vpn_state.dart';
+import 'package:vpn/mobile/utils/vpn_bloc/vpn_bloc.dart';
+import 'package:vpn/mobile/utils/vpn_bloc/vpn_event.dart';
+import 'package:vpn/mobile/utils/vpn_bloc/vpn_state.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 
 class VpnButton extends StatefulWidget {
@@ -16,6 +16,9 @@ class _VpnButtonState extends State<VpnButton>
   late AnimationController _animationController;
   Color _colortap = Colors.grey;
 
+  late final Future<InterstitialAdLoader> _adLoader;
+  InterstitialAd? _ad;
+
   @override
   void initState() {
     super.initState();
@@ -23,11 +26,60 @@ class _VpnButtonState extends State<VpnButton>
       duration: const Duration(seconds: 1),
       vsync: this,
     )..repeat(reverse: true);
+
+    MobileAds.initialize();
+    _adLoader = _createInterstitialAdLoader();
+    _loadInterstitialAd();
+  }
+
+  Future<InterstitialAdLoader> _createInterstitialAdLoader() {
+    return InterstitialAdLoader.create(
+      onAdLoaded: (InterstitialAd interstitialAd) {
+        _ad = interstitialAd;
+      },
+      onAdFailedToLoad: (error) {
+        // Обработка ошибки загрузки
+      },
+    );
+  }
+
+  Future<void> _loadInterstitialAd() async {
+    final adLoader = await _adLoader;
+    await adLoader.loadAd(
+      adRequestConfiguration: AdRequestConfiguration(
+        adUnitId: 'R-M-13885939-1', // Ваш Interstitial Ad Unit ID
+      ),
+    );
+  }
+
+  Future<void> _showAd() async {
+    if (_ad != null) {
+      _ad!.setAdEventListener(
+        eventListener: InterstitialAdEventListener(
+          onAdShown: () {},
+          onAdFailedToShow: (error) {
+            _ad?.destroy();
+            _ad = null;
+            _loadInterstitialAd();
+          },
+          onAdClicked: () {},
+          onAdDismissed: () {
+            _ad?.destroy();
+            _ad = null;
+            _loadInterstitialAd();
+          },
+          onAdImpression: (impressionData) {},
+        ),
+      );
+      await _ad!.show();
+      await _ad!.waitForDismiss();
+    }
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _ad?.destroy();
     super.dispose();
   }
 
@@ -84,28 +136,8 @@ class _VpnButtonState extends State<VpnButton>
           children: [
             GestureDetector(
               onTap: () async {
-                // await Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //         builder: (context) => Scaffold(
-                //               body: Align(
-                //                 alignment: Alignment.bottomCenter,
-                //                 child: AdWidget(
-                //                     bannerAd: BannerAd(
-                //                         adUnitId: 'R-M-13885939-1',
-                //                         adSize: BannerAdSize.inline(
-                //                             width: MediaQuery.of(context)
-                //                                 .size
-                //                                 .width
-                //                                 .toInt(),
-                //                             maxHeight: MediaQuery.of(context)
-                //                                 .size
-                //                                 .height
-                //                                 .toInt()))),
-                //               ),
-                //             )));
-
                 if (state.connectionState == FlutterVpnState.disconnected) {
+                  await _showAd();
                   context.read<VpnBloc>().add(ConnectVpn());
                 } else if (state.connectionState == FlutterVpnState.connected ||
                     state.connectionState == FlutterVpnState.connecting) {

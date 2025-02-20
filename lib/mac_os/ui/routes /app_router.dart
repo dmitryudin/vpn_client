@@ -2,7 +2,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vpn/ui/screens/balance_drawer_screens/change_tariff_screen.dart';
+import 'package:vpn/mobile/ui/screens/balance_drawer_screens/change_tariff_screen.dart';
 
 import '../../data/auth_features/auth_screen.dart';
 import '../screens/balance_drawer_screens/invite_friend_screen.dart';

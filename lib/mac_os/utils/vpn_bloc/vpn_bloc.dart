@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vpn/flutter_vpn.dart';
 import 'package:flutter_vpn/state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vpn/utils/vpn_bloc/vpn_state.dart';
-import 'package:vpn/utils/vpn_service.dart';
+import 'package:vpn/mobile/utils/vpn_bloc/vpn_state.dart';
+import 'package:vpn/mobile/utils/vpn_service.dart';
 import 'package:vpn_info/vpn_info.dart';
 
 import 'vpn_event.dart';
