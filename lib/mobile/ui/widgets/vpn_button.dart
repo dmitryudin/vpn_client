@@ -6,6 +6,8 @@ import 'package:vpn/mobile/utils/vpn_bloc/vpn_event.dart';
 import 'package:vpn/mobile/utils/vpn_bloc/vpn_state.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 
+import '../../utils/bloc/screen_state_bloc.dart';
+
 class VpnButton extends StatefulWidget {
   @override
   _VpnButtonState createState() => _VpnButtonState();
@@ -15,7 +17,6 @@ class _VpnButtonState extends State<VpnButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   Color _colortap = Colors.grey;
-
   late final Future<InterstitialAdLoader> _adLoader;
   InterstitialAd? _ad;
 
@@ -26,7 +27,6 @@ class _VpnButtonState extends State<VpnButton>
       duration: const Duration(seconds: 1),
       vsync: this,
     )..repeat(reverse: true);
-
     MobileAds.initialize();
     _adLoader = _createInterstitialAdLoader();
     _loadInterstitialAd();
@@ -47,7 +47,7 @@ class _VpnButtonState extends State<VpnButton>
     final adLoader = await _adLoader;
     await adLoader.loadAd(
       adRequestConfiguration: AdRequestConfiguration(
-        adUnitId: 'R-M-13885939-1', // Ваш Interstitial Ad Unit ID
+        adUnitId: 'R-M-13885939-1',
       ),
     );
   }
@@ -56,20 +56,19 @@ class _VpnButtonState extends State<VpnButton>
     if (_ad != null) {
       _ad!.setAdEventListener(
         eventListener: InterstitialAdEventListener(
-          onAdShown: () {},
-          onAdFailedToShow: (error) {
-            _ad?.destroy();
-            _ad = null;
-            _loadInterstitialAd();
-          },
-          onAdClicked: () {},
-          onAdDismissed: () {
-            _ad?.destroy();
-            _ad = null;
-            _loadInterstitialAd();
-          },
-          onAdImpression: (impressionData) {},
-        ),
+            onAdShown: () {},
+            onAdFailedToShow: (error) {
+              _ad?.destroy();
+              _ad = null;
+              _loadInterstitialAd();
+            },
+            onAdClicked: () {},
+            onAdDismissed: () {
+              _ad?.destroy();
+              _ad = null;
+              _loadInterstitialAd();
+            },
+            onAdImpression: (impressionData) {}),
       );
       await _ad!.show();
       await _ad!.waitForDismiss();
@@ -124,6 +123,14 @@ class _VpnButtonState extends State<VpnButton>
     }
   }
 
+  int _getCurrentTariffId(BuildContext context) {
+    final screenState = context.read<ScreenStateBloc>().state;
+    if (screenState is ScreenStateLoaded) {
+      return screenState.rootModel?.user_info?.current_tarif_id ?? 1;
+    }
+    return 1;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<VpnBloc, VpnState>(
@@ -137,10 +144,14 @@ class _VpnButtonState extends State<VpnButton>
             GestureDetector(
               onTap: () async {
                 if (state.connectionState == FlutterVpnState.disconnected) {
-                  await _showAd();
+                  final currentTariffId = _getCurrentTariffId(context);
+
+                  if (currentTariffId == 1) {
+                    await _showAd();
+                  }
+
                   context.read<VpnBloc>().add(ConnectVpn());
-                } else if (state.connectionState == FlutterVpnState.connected ||
-                    state.connectionState == FlutterVpnState.connecting) {
+                } else {
                   context.read<VpnBloc>().add(DisconnectVpn());
                 }
               },

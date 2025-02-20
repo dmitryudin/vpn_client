@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:system_tray/system_tray.dart';
-import 'package:vpn/mobile/ui/widgets/drawers/balance_drawer.dart';
-import 'package:vpn/mobile/ui/widgets/drawers/balance_drawer.dart';
-import 'package:vpn/mobile/ui/widgets/drawers/profile_drawer.dart';
+import 'package:vpn/mobile/ui/screens/drawers/balance/balance_drawer.dart';
+import 'package:vpn/mobile/ui/screens/drawers/balance/balance_drawer.dart';
+import 'package:vpn/mobile/ui/screens/drawers/profile/profile_drawer.dart';
 import 'package:vpn/mobile/ui/widgets/server_list.dart';
 import 'package:vpn/mobile/ui/widgets/vpn_button.dart';
 import 'package:iconsax/iconsax.dart';

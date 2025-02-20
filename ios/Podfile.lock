@@ -198,26 +198,26 @@ SPEC CHECKSUMS:
   AppMetricaProtobufUtils: 33f29ccee2f898b537eece0c4fe04e14e1bdab9a
   AppMetricaStorageUtils: 42c3f8163226516aec3e183db4f3e1a29fac1c41
   AppMetricaSynchronization: ed4196effc6997921fab53503e79c6505dbae707
-  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
+  device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   DivKit: 5b176400aa1667fddc9fb30530f1c5a5ef93a7e5
   DivKit_LayoutKit: 052ae0577535f6be202aeb64184fe98bcda1972c
   DivKit_LayoutKitInterface: d6f4493c7bf5823f989795a2189934541596df3b
   DivKit_Serialization: 37160aa27d0be33347d24d2667af886c5b66cc27
   DivKitBinaryCompatibilityFacade: 3de9fa5c024e2a8c1b798711c4c9aafd0be9b5c8
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_localization: 72299fb6cb4e51cae587bd953ed0b958040b71e6
-  flutter_vpn: e6f2803e48269cadde5086b3e1877a6f26f418bf
+  flutter_localization: f43b18844a2b3d2c71fd64f04ffd6b1e64dd54d4
+  flutter_vpn: a106f778c4994b07edc78c6a66ca24a7b539bb15
   KSCrash: 946472c56073afdaf6bae37d886e3f562027075c
-  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
-  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   VGSL: a46194be2ec6afc2d385b8855b4015f0488b782f
   VGSLFundamentals: 28991319b0819971a33e2a120b2d13f54f6bbc96
   VGSLNetworking: 66714a0dea9611e2f8418b5196e11e4a66d14289
   VGSLUI: bb4553a81e975c0777f19838fb90798aac748e5a
-  yandex_mobileads: 1033966b8c01eda17ce552587236df4a2c62fbef
+  yandex_mobileads: 3eb0ae0e6bd632fec5b9bd7c4179e0220b862f74
   YandexMobileAds: 1560300b24b700dfcc335e9de4ac66bbb148299a
 
 PODFILE CHECKSUM: dddf036169035fe244c075914b88e1e985fccdb3
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

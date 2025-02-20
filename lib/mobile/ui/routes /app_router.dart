@@ -2,13 +2,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vpn/mobile/ui/screens/balance_drawer_screens/change_tariff_screen.dart';
+import 'package:vpn/mobile/ui/screens/drawers/balance/balance_drawer_screens/change_tariff_screen.dart';
 
-import '../../data/auth_features/auth_screen.dart';
-import '../screens/balance_drawer_screens/invite_friend_screen.dart';
+import '../screens/auth_screens/auth_screen.dart';
+import '../screens/drawers/balance/balance_drawer_screens/invite_friend_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/onboarding_screens/onboarding_screen.dart';
-import '../screens/profile_drawer_screens/settings_screen.dart';
+import '../screens/drawers/profile/profile_drawer_screens/settings_screen.dart';
 
 class AppRouter {
   static late String _initialRoute;
