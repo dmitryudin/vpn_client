@@ -110,6 +110,8 @@ PODS:
     - VGSLUI (= 6.18.0)
   - VGSLUI (6.18.0):
     - VGSLFundamentals (= 6.18.0)
+  - vibration (3.0.0):
+    - Flutter
   - yandex_mobileads (7.8.0):
     - Flutter
     - YandexMobileAds (~> 7.9.0)
@@ -127,6 +129,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - vibration (from `.symlinks/plugins/vibration/ios`)
   - yandex_mobileads (from `.symlinks/plugins/yandex_mobileads/ios`)
 
 SPEC REPOS:
@@ -176,6 +179,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  vibration:
+    :path: ".symlinks/plugins/vibration/ios"
   yandex_mobileads:
     :path: ".symlinks/plugins/yandex_mobileads/ios"
 
@@ -215,6 +220,7 @@ SPEC CHECKSUMS:
   VGSLFundamentals: 28991319b0819971a33e2a120b2d13f54f6bbc96
   VGSLNetworking: 66714a0dea9611e2f8418b5196e11e4a66d14289
   VGSLUI: bb4553a81e975c0777f19838fb90798aac748e5a
+  vibration: 3797858f8cbf53d841e189ef8bd533d96e4ca93c
   yandex_mobileads: 3eb0ae0e6bd632fec5b9bd7c4179e0220b862f74
   YandexMobileAds: 1560300b24b700dfcc335e9de4ac66bbb148299a
 
