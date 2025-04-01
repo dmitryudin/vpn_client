@@ -310,7 +310,7 @@ class _BalanceIndicatorState extends State<BalanceIndicator> {
       leading: Container(
         padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: colorScheme.primary.withOpacity(0.1),
+          color: colorScheme.onPrimaryFixedVariant.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: colorScheme.primary),
