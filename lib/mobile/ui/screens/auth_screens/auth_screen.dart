@@ -4,6 +4,7 @@ import 'package:auth_feature/data/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/mobile/data/auth_features/auth_module.dart';
 import 'package:vpn/mobile/utils/bloc/screen_state_bloc.dart';
@@ -24,6 +25,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
   bool _isRegistered = false;
   bool _isLoginMode = false;
+  String? _errorMessage; // Для хранения сообщения об ошибке
+
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -40,6 +44,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _errorMessage = null; // Сброс ошибки перед запросом
+      });
+
       Map<String, String> deviceInfo = await getDeviceInfo();
 
       UserData userData = UserData()
@@ -49,50 +57,161 @@ class _AuthScreenState extends State<AuthScreen> {
         ..deviceType = deviceInfo['deviceType'] ?? ''
         ..deviceId = deviceInfo['deviceId'] ?? '';
 
-      AuthStatus status = await widget.authModule.authService.register(
-          userData: userData,
-          registerUrl: 'http://109.196.101.63:8000/api/register/');
+      try {
+        AuthStatus status = await widget.authModule.authService.register(
+            userData: userData,
+            registerUrl: 'http://109.196.101.63:8000/api/register/');
 
-      if (status == AuthStatus.authorized) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('is_registered', true);
-        await prefs.setString('user_email', _emailController.text);
-        if (mounted) {
-          BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
-          context.go('/');
+        if (status == AuthStatus.authorized) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('is_registered', true);
+          await prefs.setString('user_email', _emailController.text);
+          if (mounted) {
+            // Вызываем событие для обновления состояния
+            BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
+            context.go('/');
+          }
         }
+      } catch (e) {
+        setState(() {
+          _errorMessage = e.toString(); // Установка сообщения об ошибке
+        });
       }
     }
   }
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _errorMessage = null; // Сброс ошибки перед запросом
+      });
+
       Map<String, String> deviceInfo = await getDeviceInfo();
 
-      final status = await widget.authModule.authService.logIn(
-        username: _emailController.text,
-        password: _passwordController.text,
-        cloudMessageToken: '',
-        deviceType: deviceInfo['deviceType'] ?? '',
-        authUrl: 'http://109.196.101.63:8000/api/login/',
-        deviceId: deviceInfo['deviceId'] ?? '',
-      );
+      try {
+        final status = await widget.authModule.authService.logIn(
+          username: _emailController.text,
+          password: _passwordController.text,
+          cloudMessageToken: '',
+          deviceType: deviceInfo['deviceType'] ?? '',
+          authUrl: 'http://109.196.101.63:8000/api/login/',
+          deviceId: deviceInfo['deviceId'] ?? '',
+        );
 
-      if (status == AuthStatus.authorized) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('is_registered', true);
-        await prefs.setString('user_email', _emailController.text);
-        if (mounted) {
-          BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
-          context.go('/');
+        if (status == AuthStatus.authorized) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('is_registered', true);
+          await prefs.setString('user_email', _emailController.text);
+          if (mounted) {
+            // Вызываем событие для обновления состояния
+            BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
+            context.go('/');
+          }
+        } else if (status == AuthStatus.unauthorized) {
+          setState(() {
+            _errorMessage = 'Неверный пароль'; // Установка сообщения об ошибке
+          });
         }
+      } catch (e) {
+        setState(() {
+          _errorMessage = e.toString(); // Установка сообщения об ошибке
+        });
       }
     }
   }
+  // Future<void> _register() async {
+  //   if (_formKey.currentState!.validate()) {
+
+  //     setState(() {
+  //       _errorMessage = null; // Сброс ошибки перед запросом
+
+  //     });
+
+  //     Map<String, String> deviceInfo = await getDeviceInfo();
+
+  //     UserData userData = UserData()
+  //       ..email = _emailController.text
+  //       ..password = _passwordController.text
+  //       ..inviteCode = _inviteCodeController.text
+  //       ..deviceType = deviceInfo['deviceType'] ?? ''
+  //       ..deviceId = deviceInfo['deviceId'] ?? '';
+
+  //     try {
+  //       AuthStatus status = await widget.authModule.authService.register(
+  //           userData: userData,
+  //           registerUrl: 'http://109.196.101.63:8000/api/register/');
+
+  //       if (status == AuthStatus.authorized) {
+  //         final prefs = await SharedPreferences.getInstance();
+  //         await prefs.setBool('is_registered', true);
+  //         await prefs.setString('user_email', _emailController.text);
+  //         if (mounted) {
+  //           await BlocProvider.of<ScreenStateBloc>(context)
+  //               .stream
+  //               .firstWhere((state) => state is ScreenStateLoaded);
+
+  //           if (mounted) {
+  //             context.go('/');
+  //           }
+  //         }
+  //       }
+  //     } catch (e) {
+  //       setState(() {
+  //         _errorMessage = e.toString(); // Установка сообщения об ошибке
+  //       });
+  //     }
+  //   }
+  // }
+
+  // Future<void> _login() async {
+  //   if (_formKey.currentState!.validate()) {
+  //     setState(() {
+  //       _errorMessage = null; // Сброс ошибки перед запросом
+  //     });
+
+  //     Map<String, String> deviceInfo = await getDeviceInfo();
+
+  //     try {
+  //       final status = await widget.authModule.authService.logIn(
+  //         username: _emailController.text,
+  //         password: _passwordController.text,
+  //         cloudMessageToken: '',
+  //         deviceType: deviceInfo['deviceType'] ?? '',
+  //         authUrl: 'http://109.196.101.63:8000/api/login/',
+  //         deviceId: deviceInfo['deviceId'] ?? '',
+  //       );
+
+  //       if (status == AuthStatus.authorized) {
+  //         final prefs = await SharedPreferences.getInstance();
+  //         await prefs.setBool('is_registered', true);
+  //         await prefs.setString('user_email', _emailController.text);
+  //         if (mounted) {
+  //           BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
+  //           context.go('/');
+  //         }
+  //       } else if (status == AuthStatus.unauthorized) {
+  //         setState(() {
+  //           _errorMessage = 'Неверный пароль'; // Установка сообщения об ошибке
+  //         });
+  //       }
+  //     } catch (e) {
+  //       setState(() {
+  //         _errorMessage = e.toString(); // Установка сообщения об ошибке
+  //       });
+  //     }
+  //   }
+  // }
 
   void _toggleMode() {
     setState(() {
       _isLoginMode = !_isLoginMode;
+      _errorMessage = null; // Сброс ошибки при переключении режима
+    });
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
     });
   }
 
@@ -134,15 +253,40 @@ class _AuthScreenState extends State<AuthScreen> {
     return null;
   }
 
+  OutlineInputBorder _buildBorder(Color color) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(
+        color: color,
+        width: 1.5,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _isLoginMode ? 'Вход' : 'Регистрация',
-          style: TextStyle(color: Colors.white),
+        title: AnimatedTextKit(
+          animatedTexts: [
+            TyperAnimatedText(
+              _isLoginMode ? 'Добро пожаловать обратно!' : 'Создайте аккаунт',
+              textStyle: textTheme.bodyLarge?.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onPrimary,
+              ),
+              speed: Duration(milliseconds: 50),
+            ),
+          ],
+          isRepeatingAnimation: true,
         ),
-        backgroundColor: Colors.blueAccent,
+        centerTitle: true,
+        backgroundColor: colorScheme.primary,
         elevation: 0,
       ),
       body: Container(
@@ -150,7 +294,10 @@ class _AuthScreenState extends State<AuthScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.blueAccent, Colors.lightBlueAccent],
+            colors: [
+              theme.primaryColor,
+              theme.cardColor,
+            ],
           ),
         ),
         child: Padding(
@@ -162,39 +309,41 @@ class _AuthScreenState extends State<AuthScreen> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    AnimatedTextKit(
-                      animatedTexts: [
-                        TyperAnimatedText(
-                          _isLoginMode
-                              ? 'Добро пожаловать обратно!'
-                              : 'Создайте аккаунт',
-                          textStyle: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                    if (_errorMessage != null) // Отображение ошибки
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 20),
+                        child: Text(
+                          _errorMessage!,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: Colors.red,
+                            fontSize: 16,
                           ),
-                          speed: Duration(milliseconds: 100),
                         ),
-                      ],
-                    ),
+                      ),
                     SizedBox(height: 20),
                     TextFormField(
                       controller: _emailController,
                       decoration: InputDecoration(
                         labelText: 'Email',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        prefixIcon: Icon(Icons.email, color: Colors.white),
+                        prefixIcon:
+                            Icon(Iconsax.sms, color: colorScheme.onSurface),
+                        border: _buildBorder(colorScheme.outline),
+                        enabledBorder: _buildBorder(colorScheme.outline),
+                        focusedBorder: _buildBorder(colorScheme.onPrimary),
+                        errorBorder: _buildBorder(colorScheme.error),
+                        focusedErrorBorder: _buildBorder(colorScheme.error),
+                        filled: true,
+                        fillColor: colorScheme.surface,
+                        floatingLabelStyle:
+                            TextStyle(color: colorScheme.onPrimary),
+                        labelStyle: TextStyle(
+                            color: colorScheme.onSurface.withOpacity(0.7)),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                       ),
-                      style: TextStyle(color: Colors.white),
+                      style: textTheme.bodyLarge
+                          ?.copyWith(color: colorScheme.onSurface),
+                      cursorColor: colorScheme.primary,
                       validator: _validateEmail,
                     ),
                     SizedBox(height: 20),
@@ -202,20 +351,36 @@ class _AuthScreenState extends State<AuthScreen> {
                       controller: _passwordController,
                       decoration: InputDecoration(
                         labelText: 'Пароль',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                        prefixIcon:
+                            Icon(Iconsax.lock, color: colorScheme.onSurface),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Iconsax.eye : Iconsax.eye_slash,
+                            color: _obscurePassword
+                                ? colorScheme.onSurface.withOpacity(0.5)
+                                : colorScheme.primary,
+                          ),
+                          onPressed: _togglePasswordVisibility,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        prefixIcon: Icon(Icons.lock, color: Colors.white),
+                        border: _buildBorder(colorScheme.outline),
+                        enabledBorder: _buildBorder(colorScheme.outline),
+                        focusedBorder: _buildBorder(colorScheme.onPrimary),
+                        errorBorder: _buildBorder(colorScheme.error),
+                        focusedErrorBorder: _buildBorder(colorScheme.error),
+                        filled: true,
+                        fillColor: colorScheme.surface,
+                        floatingLabelStyle:
+                            TextStyle(color: colorScheme.onPrimary),
+                        labelStyle: TextStyle(
+                            color: colorScheme.onSurface.withOpacity(0.7)),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                       ),
-                      style: TextStyle(color: Colors.white),
-                      obscureText: true,
+                      obscureText:
+                          _obscurePassword, // Используем состояние здесь
+                      style: textTheme.bodyLarge
+                          ?.copyWith(color: colorScheme.onSurface),
+                      cursorColor: colorScheme.primary,
                       validator: _validatePassword,
                     ),
                     if (!_isLoginMode) ...[
@@ -224,20 +389,26 @@ class _AuthScreenState extends State<AuthScreen> {
                         controller: _confirmPasswordController,
                         decoration: InputDecoration(
                           labelText: 'Повторите пароль',
-                          labelStyle: TextStyle(color: Colors.white70),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          prefixIcon: Icon(Icons.lock, color: Colors.white),
+                          prefixIcon: Icon(Iconsax.lock_1,
+                              color: colorScheme.onSurface),
+                          border: _buildBorder(colorScheme.outline),
+                          enabledBorder: _buildBorder(colorScheme.outline),
+                          focusedBorder: _buildBorder(colorScheme.onPrimary),
+                          errorBorder: _buildBorder(colorScheme.error),
+                          focusedErrorBorder: _buildBorder(colorScheme.error),
+                          filled: true,
+                          fillColor: colorScheme.surface,
+                          floatingLabelStyle:
+                              TextStyle(color: colorScheme.onPrimary),
+                          labelStyle: TextStyle(
+                              color: colorScheme.onSurface.withOpacity(0.7)),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 20),
                         ),
-                        style: TextStyle(color: Colors.white),
                         obscureText: true,
+                        style: textTheme.bodyLarge
+                            ?.copyWith(color: colorScheme.onSurface),
+                        cursorColor: colorScheme.primary,
                         validator: _validateConfirmPassword,
                       ),
                       SizedBox(height: 20),
@@ -245,21 +416,26 @@ class _AuthScreenState extends State<AuthScreen> {
                         controller: _inviteCodeController,
                         decoration: InputDecoration(
                           labelText: 'Инвайт код',
-                          labelStyle: TextStyle(color: Colors.white70),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          prefixIcon: Icon(Icons.confirmation_number,
-                              color: Colors.white),
+                          prefixIcon:
+                              Icon(Iconsax.gift, color: colorScheme.onSurface),
+                          border: _buildBorder(colorScheme.outline),
+                          enabledBorder: _buildBorder(colorScheme.outline),
+                          focusedBorder: _buildBorder(colorScheme.onPrimary),
+                          errorBorder: _buildBorder(colorScheme.error),
+                          focusedErrorBorder: _buildBorder(colorScheme.error),
+                          filled: true,
+                          fillColor: colorScheme.surface,
+                          floatingLabelStyle:
+                              TextStyle(color: colorScheme.onPrimary),
+                          labelStyle: TextStyle(
+                              color: colorScheme.onSurface.withOpacity(0.7)),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 20),
                         ),
-                        style: TextStyle(color: Colors.white),
                         keyboardType: TextInputType.number,
+                        style: textTheme.bodyLarge
+                            ?.copyWith(color: colorScheme.onSurface),
+                        cursorColor: colorScheme.primary,
                         validator: _validateInviteCode,
                       ),
                     ],
@@ -273,12 +449,14 @@ class _AuthScreenState extends State<AuthScreen> {
                       },
                       child: Text(
                         _isLoginMode ? 'Войти' : 'Зарегистрироваться',
-                        style: TextStyle(color: Colors.blueAccent),
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onPrimary,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
                         padding:
                             EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                        backgroundColor: colorScheme.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30.0),
                         ),
@@ -288,7 +466,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       onPressed: _toggleMode,
                       child: Text(
                         _isLoginMode ? 'Создать аккаунт' : 'Уже есть аккаунт',
-                        style: TextStyle(color: Colors.white),
+                        style: textTheme.bodyMedium?.copyWith(),
                       ),
                     ),
                   ],

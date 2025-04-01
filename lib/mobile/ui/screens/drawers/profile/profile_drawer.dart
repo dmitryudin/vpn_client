@@ -42,7 +42,7 @@ class ProfileDrawer extends StatelessWidget {
                             email[0].toUpperCase(),
                             style: textTheme.bodyLarge?.copyWith(
                               fontSize: 32,
-                              color: theme.focusColor,
+                              color: theme.primaryColor,
                               fontWeight: FontWeight.bold,
                             ),
                           )
@@ -107,19 +107,19 @@ class ProfileDrawer extends StatelessWidget {
                     _buildMenuItem(
                       icon: Icons.info,
                       title: 'О нас',
-                      onTap: () {},
+                      onTap: () => context.push('/about'),
                       colorScheme: colorScheme,
                     ),
                     _buildMenuItem(
                       icon: Icons.question_answer,
                       title: 'FAQ',
-                      onTap: () {},
+                      onTap: () => context.push('/faq'),
                       colorScheme: colorScheme,
                     ),
                     _buildMenuItem(
                       icon: Icons.support,
                       title: 'Поддержка',
-                      onTap: () {},
+                      onTap: () => context.push('/support'),
                       colorScheme: colorScheme,
                     ),
                   ],
@@ -143,7 +143,7 @@ class ProfileDrawer extends StatelessWidget {
       leading: Container(
         padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: colorScheme.primary.withOpacity(0.1),
+          color: colorScheme.onPrimary.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: colorScheme.primary),

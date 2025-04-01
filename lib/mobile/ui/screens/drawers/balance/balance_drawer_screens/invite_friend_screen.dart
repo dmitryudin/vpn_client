@@ -48,14 +48,14 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
           borderRadius: BorderRadius.circular(15),
         ),
         title: Text('Ваш код приглашения',
-            style: TextStyle(color: theme.primaryColor)),
+            style: TextStyle(color: theme.colorScheme.onPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.primaryColor.withOpacity(0.1),
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
@@ -66,6 +66,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                       'Код: $inviteCode',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -85,15 +86,21 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
         ),
         actions: [
           TextButton.icon(
-            icon: Icon(Icons.share),
-            label: Text('Поделиться'),
+            icon: Icon(Icons.share, color: theme.colorScheme.onPrimary),
+            label: Text(
+              'Поделиться',
+              style: TextStyle(color: theme.colorScheme.onPrimary),
+            ),
             onPressed: () {
               Share.share('Используйте мой код приглашения: $inviteCode');
             },
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Закрыть'),
+            child: Text(
+              'Закрыть',
+              style: TextStyle(color: theme.colorScheme.onPrimary),
+            ),
           ),
         ],
       ),
@@ -106,7 +113,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Пригласить друга'),
-        backgroundColor: theme.primaryColor,
+        backgroundColor: theme.colorScheme.primary,
         leading: IconButton(
           icon: Icon(Icons.keyboard_arrow_down_sharp),
           onPressed: () => context.pop(),
@@ -122,7 +129,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                 'Приглашайте друзей и получайте бонусы!',
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: theme.primaryColor,
+                  color: theme.colorScheme.onPrimary,
                 ),
               ),
               SizedBox(height: 30),
@@ -162,7 +169,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
               ElevatedButton(
                 onPressed: _generateInviteCode,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primaryColor,
+                  backgroundColor: theme.colorScheme.primary,
                   padding: EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -196,10 +203,10 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.primaryColor.withOpacity(0.1),
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: theme.primaryColor),
+              child: Icon(icon, color: theme.colorScheme.onPrimary),
             ),
             SizedBox(width: 16),
             Expanded(
@@ -210,7 +217,9 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   SizedBox(height: 4),
-                  Text(description, style: TextStyle(color: Colors.grey[600])),
+                  Text(description,
+                      style: TextStyle(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7))),
                 ],
               ),
             ),
@@ -229,20 +238,23 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: theme.primaryColor,
+              color: theme.colorScheme.primary,
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 step,
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold),
               ),
             ),
           ),
           SizedBox(width: 12),
           Expanded(
-            child: Text(text, style: TextStyle(fontSize: 16)),
+            child: Text(text,
+                style: TextStyle(
+                    fontSize: 16, color: theme.colorScheme.onSurface)),
           ),
         ],
       ),
