@@ -176,34 +176,34 @@ class _VpnButtonState extends State<VpnButton>
               GestureDetector(
                 onTap: () async {
                   if (state.connectionState == FlutterVpnState.disconnected) {
-                    final currentTariffId = _getCurrentTariffId(context);
-                    final prefs = await SharedPreferences.getInstance();
+                    // final currentTariffId = _getCurrentTariffId(context);
+                    // final prefs = await SharedPreferences.getInstance();
 
-                    if (currentTariffId == 1) {
-                      // Увеличиваем счетчик нажатий
-                      int pressCount = prefs.getInt('vpnPressCount') ?? 0;
-                      pressCount++;
-                      await prefs.setInt('vpnPressCount', pressCount);
+                    // if (currentTariffId == 1) {
+                    //   // Увеличиваем счетчик нажатий
+                    //   int pressCount = prefs.getInt('vpnPressCount') ?? 0;
+                    //   pressCount++;
+                    //   await prefs.setInt('vpnPressCount', pressCount);
 
-                      // Проверяем условия показа баннера (каждые 2 нажатия)
-                      if (pressCount % 3 == 0) {
-                        // Показываем баннер и ждем результат
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => WithoutAdd()),
-                        );
+                    //   // Проверяем условия показа баннера (каждые 2 нажатия)
+                    //   if (pressCount % 3 == 0) {
+                    //     // Показываем баннер и ждем результат
+                    //     final result = await Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(builder: (context) => WithoutAdd()),
+                    //     );
 
-                        // Если баннер закрыт - показываем рекламу и сбрасываем счетчик
-                        if (result == 'closed') {
-                          await _showAd();
-                          await prefs.setInt(
-                              'vpnPressCount', 0); // Сброс счетчика
-                        }
-                      } else {
-                        // Показываем рекламу для нечетных нажатий
-                        await _showAd();
-                      }
-                    }
+                    //     // Если баннер закрыт - показываем рекламу и сбрасываем счетчик
+                    //     if (result == 'closed') {
+                    //       await _showAd();
+                    //       await prefs.setInt(
+                    //           'vpnPressCount', 0); // Сброс счетчика
+                    //     }
+                    //   } else {
+                    //     // Показываем рекламу для нечетных нажатий
+                    //     await _showAd();
+                    //   }
+                    // }
 
                     // Вибрация для всех случаев
                     if (await Haptics.canVibrate()) {

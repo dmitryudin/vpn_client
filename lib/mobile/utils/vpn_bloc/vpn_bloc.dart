@@ -59,9 +59,6 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
         emit(VpnState(
             connectionState: FlutterVpnState.connecting,
             status: 'Подключение'));
-        print('host ${currentServer!.userName}');
-        print('host ${currentServer!.host}');
-        print('host ${currentServer!.password}');
 
         await VpnService.connect(
             username: currentServer!.userName,
@@ -74,10 +71,10 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
       emit(VpnState(
           connectionState: FlutterVpnState.disconnecting,
           status: 'Отключение'));
-      await VpnService.connect(username: '', server: '', password: '');
-      await VpnService.disconnect();
       emit(VpnState(
           connectionState: FlutterVpnState.disconnected, status: 'Отключено'));
+      await VpnService.connect(username: '', server: '', password: '');
+      await VpnService.disconnect();
     });
 
     on<UpdateVpnState>((event, emit) async {

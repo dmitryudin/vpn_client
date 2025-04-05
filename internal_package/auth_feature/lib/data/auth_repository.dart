@@ -98,6 +98,9 @@ Future<UserData> loginInServer(
     if (_.response!.statusCode == 401) {
       return UserData()..authStatus = AuthStatus.unauthorized;
     }
+    if (_.response!.statusCode == 403) {
+      return UserData()..authStatus = AuthStatus.device_lomit_over;
+    }
     return UserData()..authStatus = AuthStatus.unauthorized;
   }
 }

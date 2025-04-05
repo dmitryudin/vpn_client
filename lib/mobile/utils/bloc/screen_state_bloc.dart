@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vpn/mobile/internal.dart';
 import 'package:vpn_engine/from_server/api_server/models/free_server_model.dart';
 import 'package:vpn_engine/from_server/api_server/models/root_model.dart';
 import 'package:vpn_engine/from_server/api_server/models/server_http_model.dart';
@@ -38,7 +39,7 @@ class ScreenStateBloc extends Bloc<ScreenStateEvent, ScreenStateState> {
   Future<void> getServerInfoUnauthorizedUser(event, emit) async {
     print('getting info for unauthorized user from server repository');
     ServerRepository repository = ServerRepository(
-        baseAddress: 'http://109.196.101.63:8000',
+        baseAddress: Config.baseUrl,
         accessToken: GetIt.I<AuthService>().user.accessToken);
     FreeServerHttpModel freeServerHttpModel =
         await repository.getFreeServersInfoCached();
@@ -70,7 +71,7 @@ class ScreenStateBloc extends Bloc<ScreenStateEvent, ScreenStateState> {
 
   Future<void> getServerInfoAuthorizedUser(event, emit) async {
     ServerRepository repository = ServerRepository(
-        baseAddress: 'http://109.196.101.63:8000',
+        baseAddress: '${Config.baseUrl}',
         accessToken: GetIt.I<AuthService>().user.accessToken);
     RootHttpModel rootModel = await repository.getServerInfoCached();
     (rootModel.servers ?? [])

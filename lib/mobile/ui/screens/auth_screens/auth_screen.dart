@@ -2,11 +2,13 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:auth_feature/data/auth_data.dart';
 import 'package:auth_feature/data/device_info.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/mobile/data/auth_features/auth_module.dart';
+import 'package:vpn/mobile/internal.dart';
 import 'package:vpn/mobile/utils/bloc/screen_state_bloc.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -51,7 +53,7 @@ class _AuthScreenState extends State<AuthScreen> {
       Map<String, String> deviceInfo = await getDeviceInfo();
 
       UserData userData = UserData()
-        ..email = _emailController.text
+        ..email = _emailController.text.trim()
         ..password = _passwordController.text
         ..inviteCode = _inviteCodeController.text
         ..deviceType = deviceInfo['deviceType'] ?? ''
@@ -59,18 +61,45 @@ class _AuthScreenState extends State<AuthScreen> {
 
       try {
         AuthStatus status = await widget.authModule.authService.register(
-            userData: userData,
-            registerUrl: 'http://109.196.101.63:8000/api/register/');
-
-        if (status == AuthStatus.authorized) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('is_registered', true);
-          await prefs.setString('user_email', _emailController.text);
-          if (mounted) {
-            // Вызываем событие для обновления состояния
-            BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
-            context.go('/');
-          }
+            userData: userData, registerUrl: '${Config.baseUrl}/api/register/');
+        switch (status) {
+          case (AuthStatus.authorized):
+            {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('is_registered', true);
+              await prefs.setString('user_email', _emailController.text);
+              if (mounted) {
+                // Вызываем событие для обновления состояния
+                BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
+                context.go('/');
+              }
+              break;
+            }
+          case (AuthStatus.user_exist):
+            {
+              setState(() {
+                _errorMessage = 'Пользователь существует';
+              });
+            }
+          case (AuthStatus.network_failure):
+            {
+              setState(() {
+                _errorMessage = 'Сервис недоступен';
+              });
+            }
+          case (AuthStatus.error_of_validation):
+            {
+              setState(() {
+                _errorMessage = 'Введены некорректные данные';
+              });
+            }
+          default:
+            {
+              setState(() {
+                _errorMessage =
+                    'Внутренняя ошибка сервера, обратитесь в тех. поддержку';
+              });
+            }
         }
       } catch (e) {
         setState(() {
@@ -88,34 +117,64 @@ class _AuthScreenState extends State<AuthScreen> {
 
       Map<String, String> deviceInfo = await getDeviceInfo();
 
-      try {
-        final status = await widget.authModule.authService.logIn(
-          username: _emailController.text,
-          password: _passwordController.text,
-          cloudMessageToken: '',
-          deviceType: deviceInfo['deviceType'] ?? '',
-          authUrl: 'http://109.196.101.63:8000/api/login/',
-          deviceId: deviceInfo['deviceId'] ?? '',
-        );
+      final status = await widget.authModule.authService.logIn(
+        username: _emailController.text,
+        password: _passwordController.text,
+        cloudMessageToken: '',
+        deviceType: deviceInfo['deviceType'] ?? '',
+        authUrl: '${Config.baseUrl}/api/login/',
+        deviceId: deviceInfo['deviceId'] ?? '',
+      );
 
-        if (status == AuthStatus.authorized) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('is_registered', true);
-          await prefs.setString('user_email', _emailController.text);
-          if (mounted) {
-            // Вызываем событие для обновления состояния
-            BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
-            context.go('/');
+      switch (status) {
+        case (AuthStatus.authorized):
+          {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('is_registered', true);
+            await prefs.setString('user_email', _emailController.text);
+            if (mounted) {
+              // Вызываем событие для обновления состояния
+              BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
+              context.go('/');
+            }
+            break;
           }
-        } else if (status == AuthStatus.unauthorized) {
-          setState(() {
-            _errorMessage = 'Неверный пароль'; // Установка сообщения об ошибке
-          });
-        }
-      } catch (e) {
-        setState(() {
-          _errorMessage = e.toString(); // Установка сообщения об ошибке
-        });
+        case (AuthStatus.error_of_password):
+          {
+            setState(() {
+              _errorMessage = 'Неверный пароль';
+            });
+          }
+        case (AuthStatus.unauthorized):
+          {
+            setState(() {
+              _errorMessage = 'Неверные учетные данные';
+            });
+          }
+        case (AuthStatus.user_not_found):
+          {
+            setState(() {
+              _errorMessage = 'Пользователь не найден, зарегистрируйтесь';
+            });
+          }
+        case (AuthStatus.network_failure):
+          {
+            setState(() {
+              _errorMessage = 'Сервис недоступен';
+            });
+          }
+        case (AuthStatus.device_lomit_over):
+          {
+            setState(() {
+              _errorMessage = 'Превышено максимальное количество устройств';
+            });
+          }
+        default:
+          {
+            setState(() {
+              _errorMessage = 'Внутренняя ошибка сервиса';
+            });
+          }
       }
     }
   }
@@ -263,6 +322,8 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  String registerStatus = '';
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -323,6 +384,16 @@ class _AuthScreenState extends State<AuthScreen> {
                     SizedBox(height: 20),
                     TextFormField(
                       controller: _emailController,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(
+                            RegExp(r'\s')), // Блокирует пробелы
+                        TextInputFormatter.withFunction(
+                          (oldValue, newValue) => newValue.copyWith(
+                            text: newValue.text
+                                .toLowerCase(), // Перевод в нижний регистр
+                          ),
+                        ),
+                      ],
                       decoration: InputDecoration(
                         labelText: 'Email',
                         prefixIcon:
@@ -343,7 +414,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                       style: textTheme.bodyLarge
                           ?.copyWith(color: colorScheme.onSurface),
-                      cursorColor: colorScheme.primary,
+                      cursorColor: colorScheme.onSurface,
                       validator: _validateEmail,
                     ),
                     SizedBox(height: 20),
@@ -356,9 +427,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword ? Iconsax.eye : Iconsax.eye_slash,
-                            color: _obscurePassword
-                                ? colorScheme.onSurface.withOpacity(0.5)
-                                : colorScheme.primary,
+                            color: colorScheme.onSurface,
+                            // ? colorScheme.onSurface.withOpacity(0.5)
+                            // : colorScheme.primary,
                           ),
                           onPressed: _togglePasswordVisibility,
                         ),
@@ -380,7 +451,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           _obscurePassword, // Используем состояние здесь
                       style: textTheme.bodyLarge
                           ?.copyWith(color: colorScheme.onSurface),
-                      cursorColor: colorScheme.primary,
+                      cursorColor: colorScheme.onSurface,
                       validator: _validatePassword,
                     ),
                     if (!_isLoginMode) ...[
@@ -397,6 +468,17 @@ class _AuthScreenState extends State<AuthScreen> {
                           errorBorder: _buildBorder(colorScheme.error),
                           focusedErrorBorder: _buildBorder(colorScheme.error),
                           filled: true,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Iconsax.eye
+                                  : Iconsax.eye_slash,
+                              color: colorScheme.onSurface,
+                              // ? colorScheme.onSurface.withOpacity(0.5)
+                              // : colorScheme.primary,
+                            ),
+                            onPressed: _togglePasswordVisibility,
+                          ),
                           fillColor: colorScheme.surface,
                           floatingLabelStyle:
                               TextStyle(color: colorScheme.onPrimary),
@@ -405,10 +487,10 @@ class _AuthScreenState extends State<AuthScreen> {
                           contentPadding: EdgeInsets.symmetric(
                               vertical: 16, horizontal: 20),
                         ),
-                        obscureText: true,
+                        obscureText: _obscurePassword,
                         style: textTheme.bodyLarge
                             ?.copyWith(color: colorScheme.onSurface),
-                        cursorColor: colorScheme.primary,
+                        cursorColor: colorScheme.onSurface,
                         validator: _validateConfirmPassword,
                       ),
                       SizedBox(height: 20),
@@ -435,11 +517,15 @@ class _AuthScreenState extends State<AuthScreen> {
                         keyboardType: TextInputType.number,
                         style: textTheme.bodyLarge
                             ?.copyWith(color: colorScheme.onSurface),
-                        cursorColor: colorScheme.primary,
+                        cursorColor: colorScheme.onSurface,
                         validator: _validateInviteCode,
                       ),
+                      // SizedBox(height: 15),
+                      // Text(
+                      //   '$registerStatus',
+                      //   style: TextStyle(color: Colors.red),
+                      // ),
                     ],
-                    SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () async {
                         final prefs = await SharedPreferences.getInstance();

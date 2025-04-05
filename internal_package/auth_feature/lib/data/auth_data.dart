@@ -14,6 +14,7 @@ enum AuthStatus {
   user_exist,
   unknown,
   error_of_validation,
+  device_lomit_over
 }
 
 class UserData {

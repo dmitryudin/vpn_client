@@ -109,6 +109,8 @@ class AuthService {
         return AuthStatus.network_failure;
       case (AuthStatus.user_exist):
         return AuthStatus.user_exist;
+      case (AuthStatus.device_lomit_over):
+        return AuthStatus.device_lomit_over;
       default:
         return AuthStatus.unauthorized;
     }
