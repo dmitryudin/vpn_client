@@ -95,4 +95,12 @@ class ServerRepository {
       return FreeServerHttpModel(tariffs: [], servers: []);
     }
   }
+
+  Future<void> logout(String deviceId, String email) async {
+    Response response = await Dio().post('$baseAddress/api/logout/',
+        data: {'device_id': deviceId, 'email': email},
+        options: Options(
+          headers: <String, String>{'authorization': 'Token $accessToken'},
+        ));
+  }
 }

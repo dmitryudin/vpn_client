@@ -77,6 +77,8 @@ class AuthService {
         return AuthStatus.network_failure;
       case (AuthStatus.user_not_found):
         return AuthStatus.user_not_found;
+      case (AuthStatus.device_lomit_over):
+        return AuthStatus.device_lomit_over;
       default:
         return AuthStatus.unauthorized;
     }

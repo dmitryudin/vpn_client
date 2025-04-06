@@ -67,7 +67,7 @@ Future<void> deleteUserData() async {
   box.put('deviceId', '');
   box.put('deviceType', '');
   box.put('accessToken', '');
-  box.put('auth_status', AuthStatus.unauthorized);
+  box.put('auth_status', AuthStatus.unauthorized.toString());
 }
 
 Future<UserData> getUserData() async {

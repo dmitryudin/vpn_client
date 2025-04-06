@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_updater/updater_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:system_tray/system_tray.dart';
+import 'package:vpn/mac_os/utils/bloc/screen_state_bloc.dart';
+import 'package:vpn/mac_os/utils/vpn_bloc/vpn_bloc.dart';
+import 'package:vpn/main.dart';
 import 'package:vpn/mobile/ui/screens/drawers/balance/balance_drawer.dart';
 import 'package:vpn/mobile/ui/screens/drawers/balance/balance_drawer.dart';
 import 'package:vpn/mobile/ui/screens/drawers/profile/profile_drawer.dart';
@@ -21,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    checkUpdates(context);
   }
 
   @override
@@ -54,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              drawer: ProfileDrawer(email: email),
+              drawer: ProfileDrawer(),
               endDrawer: BalanceIndicator(),
               body: Container(
                 decoration: BoxDecoration(

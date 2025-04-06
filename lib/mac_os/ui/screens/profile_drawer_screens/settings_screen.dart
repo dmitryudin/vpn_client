@@ -144,6 +144,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               killSwitchEnabled,
               (value) => setState(() => killSwitchEnabled = value),
             ),
+            SizedBox(height: 16),
+            ElevatedButton(onPressed: () {}, child: Text('Выйти из профиля')),
+            SizedBox(height: 16),
+            ElevatedButton(onPressed: () {}, child: Text('Удалить аккаунт'))
           ],
         ),
       ),

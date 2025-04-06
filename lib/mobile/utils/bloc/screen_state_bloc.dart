@@ -1,6 +1,8 @@
 import 'package:auth_feature/auth_feature.dart';
 import 'package:auth_feature/data/auth_data.dart';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +36,39 @@ class ScreenStateBloc extends Bloc<ScreenStateEvent, ScreenStateState> {
     on<UpdateBalance>((event, emit) {
       this.add(LoadServerList());
     });
+
+    on<Logout>((event, emit) async {
+      String email = GetIt.I<AuthService>().user.email;
+      String deviceId = GetIt.I<AuthService>().user.deviceId;
+      try {
+        ServerRepository repository = ServerRepository(
+            baseAddress: '${Config.baseUrl}',
+            accessToken: GetIt.I<AuthService>().user.accessToken);
+        await repository.logout(deviceId, email);
+        GetIt.I<AuthService>().logOut();
+        SharedPreferences sharedPreferences =
+            await SharedPreferences.getInstance();
+        await sharedPreferences.clear();
+      } catch (e) {}
+
+      add(LoadServerList());
+    });
+  }
+  Future<void> logOut() async {
+    String email = GetIt.I<AuthService>().user.email;
+    String deviceId = GetIt.I<AuthService>().user.deviceId;
+    try {
+      ServerRepository repository = ServerRepository(
+          baseAddress: '${Config.baseUrl}',
+          accessToken: GetIt.I<AuthService>().user.accessToken);
+      await repository.logout(deviceId, email);
+      GetIt.I<AuthService>().logOut();
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      await sharedPreferences.clear();
+    } catch (e) {}
+
+    add(LoadServerList());
   }
 
   Future<void> getServerInfoUnauthorizedUser(event, emit) async {

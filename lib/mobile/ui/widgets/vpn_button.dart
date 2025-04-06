@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vpn/state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vpn/mobile/ui/widgets/alert_dialog.dart';
 import 'package:vpn/mobile/utils/vpn_bloc/vpn_bloc.dart';
 import 'package:vpn/mobile/utils/vpn_bloc/vpn_event.dart';
 import 'package:vpn/mobile/utils/vpn_bloc/vpn_state.dart';
@@ -155,6 +156,29 @@ class _VpnButtonState extends State<VpnButton>
     return 1;
   }
 
+  bool _isUserRegistred(BuildContext context) {
+    final screenState = context.read<ScreenStateBloc>().state;
+    if (screenState is ScreenStateLoaded) {
+      print(
+          'is user registred ${screenState.rootModel?.user_info?.is_email_verified}');
+      if (screenState.rootModel?.user_info?.is_email_verified == null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool _isEmailVerified(BuildContext context) {
+    final screenState = context.read<ScreenStateBloc>().state;
+    if (screenState is ScreenStateLoaded) {
+      if (screenState.rootModel?.user_info?.is_email_verified == null) {
+        return false;
+      }
+      return screenState.rootModel?.user_info?.is_email_verified ?? false;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<VpnBloc, VpnState>(
@@ -176,10 +200,29 @@ class _VpnButtonState extends State<VpnButton>
               GestureDetector(
                 onTap: () async {
                   if (state.connectionState == FlutterVpnState.disconnected) {
-                    // final currentTariffId = _getCurrentTariffId(context);
-                    // final prefs = await SharedPreferences.getInstance();
+                    final currentTariffId = _getCurrentTariffId(context);
+                    bool isUserRegistred = _isUserRegistred(context);
+                    bool isEmailVerified = _isEmailVerified(context);
 
-                    // if (currentTariffId == 1) {
+                    // final prefs = await SharedPreferences.getInstance();
+                    print('is user register builded = $isUserRegistred');
+
+                    if (!isUserRegistred) {
+                      await showCustomDialog(context,
+                          title: 'Внимание',
+                          message:
+                              'Для корректоной работы приложения зарегистрируйтесь и подтвердите e-mail');
+                      return;
+                    }
+                    if (!isEmailVerified) {
+                      BlocProvider.of<ScreenStateBloc>(context)
+                          .add(LoadServerList());
+                      await showCustomDialog(context,
+                          title: 'Внимание',
+                          message:
+                              'Для корректоной работы приложения подтвердите e-mail. Если уже E-mail подтвержден, нажмите на кнопку подключения VPN повторно');
+                      return;
+                    }
                     //   // Увеличиваем счетчик нажатий
                     //   int pressCount = prefs.getInt('vpnPressCount') ?? 0;
                     //   pressCount++;

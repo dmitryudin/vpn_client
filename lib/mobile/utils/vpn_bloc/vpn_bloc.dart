@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vpn/flutter_vpn.dart';
 import 'package:flutter_vpn/state.dart';
@@ -10,13 +11,27 @@ import 'package:vpn_info/vpn_info.dart';
 
 import 'vpn_event.dart';
 
+class VpnChecker {
+  static const platform = MethodChannel('com.example/vpn');
+  Future<bool> isVPNConnected() async {
+    try {
+      final bool result = await platform.invokeMethod('isVPNConnected');
+      print('platform result = $result');
+      return result;
+    } on PlatformException catch (e) {
+      print("Failed to get VPN status: '${e.message}'.");
+      return false;
+    }
+  }
+}
+
 class VpnBloc extends Bloc<VpnEvent, VpnState> {
   CurrentServer? currentServer;
   Future<void> checkConnectState() async {
     if (Platform.isIOS) {
       await FlutterVpn.prepare();
 
-      bool vpnConnected = await VpnInfo.isVpnConnected();
+      bool vpnConnected = await VpnChecker().isVPNConnected();
       if (vpnConnected) {
         emit(VpnState(
             connectionState: FlutterVpnState.connected, status: 'Подключено'));
@@ -28,6 +43,7 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
     }
 
     if (Platform.isAndroid) {
+      await FlutterVpn.prepare();
       bool vpnConnected = await VpnInfo.isVpnConnected();
       if (vpnConnected) {
         emit(VpnState(

@@ -1,20 +1,29 @@
+import 'package:auth_feature/auth_feature.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:vpn/mac_os/utils/bloc/screen_state_bloc.dart';
 import '../../../../../localization/app_localization.dart';
 
-class ProfileDrawer extends StatelessWidget {
-  final String email;
-  final String languageCode;
+class ProfileDrawer extends StatefulWidget {
+  String languageCode;
+  ProfileDrawer({this.languageCode = 'ru'});
 
-  const ProfileDrawer({required this.email, this.languageCode = 'ru'});
+  @override
+  State<ProfileDrawer> createState() => _ProfileDrawerState();
+}
 
+class _ProfileDrawerState extends State<ProfileDrawer> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final bool isAuthorized = email.isNotEmpty;
+    String email = GetIt.I<AuthService>().user.email;
+
+    bool isAuthorized = email.isNotEmpty;
 
     return Drawer(
       child: Container(
@@ -93,9 +102,17 @@ class ProfileDrawer extends StatelessWidget {
                   children: [
                     _buildMenuItem(
                       icon: Icons.settings,
-                      title:
-                          AppLocalization.translate('settings', languageCode),
-                      onTap: () => context.push('/settings'),
+                      title: AppLocalization.translate(
+                          'settings', widget.languageCode),
+                      onTap: () async {
+                        await context.push('/settings');
+                        setState(() {
+                          email = GetIt.I<AuthService>().user.email;
+                          if (email.isEmpty) {
+                            isAuthorized = false;
+                          }
+                        });
+                      },
                       colorScheme: colorScheme,
                     ),
                     _buildMenuItem(

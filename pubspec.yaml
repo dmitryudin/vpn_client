@@ -43,6 +43,8 @@ dependencies:
     path: internal_package/auth_feature
   vpn_engine:
     path: internal_package/vpn_engine
+  flutter_updater:
+    path: internal_package/flutter_updater
   get_it: any 
   share_plus: any 
   vibration: 3.1.3
@@ -64,6 +66,7 @@ dependencies:
     
   window_manager: ^0.4.3
   system_tray: ^2.0.3
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

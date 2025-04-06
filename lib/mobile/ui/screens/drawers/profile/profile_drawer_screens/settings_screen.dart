@@ -1,9 +1,16 @@
+import 'package:auth_feature/auth_feature.dart';
+import 'package:auth_feature/data/auth_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/localization/app_localization.dart';
+import 'package:vpn/main.dart';
+
+import 'package:vpn/mobile/utils/bloc/screen_state_bloc.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -134,6 +141,94 @@ class _SettingsScreenState extends State<SettingsScreen> {
               killSwitchEnabled,
               (value) => setState(() => killSwitchEnabled = value),
             ),
+            SizedBox(height: 16),
+            GetIt.I<AuthService>().user.authStatus == AuthStatus.authorized
+                ? Align(
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          bool? confirm = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Подтверждение выхода'),
+                                content: Text('Вы уверены, что хотите выйти?'),
+                                actions: <Widget>[
+                                  ElevatedButton(
+                                    child: Text('Отмена'),
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // Закрываем диалог
+                                    },
+                                  ),
+                                  ElevatedButton(
+                                    child: Text('Да'),
+                                    onPressed: () {
+                                      // Здесь вы можете добавить логику для удаления аккаунта
+                                      // Например, вызов API для удаления аккаунта
+                                      // После удаления закрываем диалог
+                                      Navigator.of(context).pop(true);
+                                      // Можно также показать сообщение об успешном удалении
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          if (confirm == true) {
+                            await BlocProvider.of<ScreenStateBloc>(context)
+                                .logOut();
+
+                            context.pop();
+                          }
+                        },
+                        child: Text('Выйти из профиля')))
+                : Container(),
+            SizedBox(height: 16),
+            GetIt.I<AuthService>().user.authStatus == AuthStatus.authorized
+                ? Align(
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          bool? confirm = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Подтверждение удаления'),
+                                content: Text(
+                                    'Вы уверены, что хотите удалить аккаунт?'),
+                                actions: <Widget>[
+                                  ElevatedButton(
+                                    child: Text('Отмена'),
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // Закрываем диалог
+                                    },
+                                  ),
+                                  ElevatedButton(
+                                    child: Text('Удалить'),
+                                    onPressed: () {
+                                      // Здесь вы можете добавить логику для удаления аккаунта
+                                      // Например, вызов API для удаления аккаунта
+                                      // После удаления закрываем диалог
+                                      Navigator.of(context).pop(true);
+                                      // Можно также показать сообщение об успешном удалении
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          if (confirm == true) {
+                            await BlocProvider.of<ScreenStateBloc>(context)
+                                .logOut();
+                            context.pop();
+                          }
+                        },
+                        child: Text('Удалить аккаунт'),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.red),
+                        )))
+                : Container()
           ],
         ),
       ),

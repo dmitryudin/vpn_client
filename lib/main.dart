@@ -5,14 +5,18 @@ import 'package:auth_feature/data/auth_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:flutter_updater/updater_repository.dart';
 import 'package:flutter_vpn/state.dart';
 import 'package:get_it/get_it.dart';
-
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:vpn/localization/app_localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:vpn/mobile/internal.dart';
+import 'package:vpn/mobile/ui/screens/updater_dialog/updater_dialog.dart';
 import 'package:vpn/mobile/ui/theme/app_theme.dart';
+import 'package:vpn/mobile/ui/widgets/alert_dialog.dart';
 import 'package:vpn/mobile/utils/bloc/screen_state_bloc.dart';
 import 'package:vpn/mobile/utils/vpn_bloc/vpn_bloc.dart';
 import 'package:vpn/mobile/utils/vpn_bloc/vpn_state.dart';
@@ -21,9 +25,25 @@ import 'package:yandex_mobileads/mobile_ads.dart';
 
 import 'mobile/ui/routes /app_router.dart';
 
+void checkUpdates(BuildContext context) {
+  Updater updater = Updater(baseUrl: Config.baseUrl);
+  Future<UpdateObject> updateObject = updater.checkUpdates();
+  updateObject.then((UpdateObject object) {
+    if (object.availibleUpdate) {
+      showForceUpdateDialog(context, object.urlForUpdate);
+    }
+  });
+}
+
+Key key = UniqueKey();
+
+void restartApp() {
+  key = UniqueKey();
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await MobileAds.initialize();
+  // await MobileAds.initialize();
   final prefs = await SharedPreferences.getInstance();
   final String languageCode =
       prefs.getString(AppLocalization.LANGUAGE_CODE) ?? 'ru';
@@ -49,6 +69,7 @@ void main() async {
     ],
     child: Phoenix(
       child: MyApp(
+        key: key,
         initialLanguage: languageCode,
         initialRoute: seenOnboarding ? '/' : '/onboarding',
         router: router,
@@ -60,7 +81,7 @@ void main() async {
 class MyApp extends StatefulWidget {
   final String initialLanguage;
   final String initialRoute;
-  final router;
+  final GoRouter router;
 
   MyApp({
     super.key,
@@ -79,6 +100,9 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkUpdates(context);
+    });
 
     // Configure the user privacy data policy before init sdk
     MobileAds.initialize();

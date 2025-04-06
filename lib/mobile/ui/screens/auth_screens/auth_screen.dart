@@ -68,9 +68,11 @@ class _AuthScreenState extends State<AuthScreen> {
               final prefs = await SharedPreferences.getInstance();
               await prefs.setBool('is_registered', true);
               await prefs.setString('user_email', _emailController.text);
+              print('auth sucess');
               if (mounted) {
                 // Вызываем событие для обновления состояния
                 BlocProvider.of<ScreenStateBloc>(context).add(LoadServerList());
+                print('go to the root');
                 context.go('/');
               }
               break;

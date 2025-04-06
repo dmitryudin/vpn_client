@@ -9,3 +9,7 @@ class UpdateBalance extends ScreenStateEvent {
   final int balance;
   UpdateBalance(this.balance);
 }
+
+class Logout extends ScreenStateEvent {
+  Logout();
+}
