@@ -62,6 +62,7 @@ class _AuthScreenState extends State<AuthScreen> {
       try {
         AuthStatus status = await widget.authModule.authService.register(
             userData: userData, registerUrl: '${Config.baseUrl}/api/register/');
+        print('status $status');
         switch (status) {
           case (AuthStatus.authorized):
             {

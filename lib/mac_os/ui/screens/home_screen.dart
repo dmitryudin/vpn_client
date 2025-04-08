@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
                   ),
                 ],
               ),
-              drawer: ProfileDrawer(email: email),
+              drawer: ProfileDrawer(),
               endDrawer: BalanceIndicator(),
               body: Container(
                 decoration: BoxDecoration(

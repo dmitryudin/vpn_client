@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:auth_feature/auth_feature.dart';
 import 'package:auth_feature/data/auth_data.dart';
+import 'package:auth_feature/data/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_updater/updater_repository.dart';
 import 'package:flutter_vpn/state.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:vpn/localization/app_localization.dart';
@@ -53,7 +55,7 @@ void main() async {
   GetIt.I.registerSingleton<AuthService>(AuthService());
 
   GetIt.I<AuthService>().user = await GetIt.I<AuthService>().getUser();
-
+  print(await getDeviceInfo());
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider<ScreenStateBloc>(
