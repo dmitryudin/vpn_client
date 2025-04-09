@@ -44,7 +44,9 @@ dependencies:
   vpn_engine:
     path: internal_package/vpn_engine
   flutter_updater:
-    path: internal_package/flutter_updater
+    git:
+        url: https://github.com/dmitryudin/flutter_updater.git
+        ref: master
   get_it: any 
   share_plus: any 
   vibration: 3.1.3

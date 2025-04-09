@@ -327,9 +327,11 @@ packages:
   flutter_updater:
     dependency: "direct main"
     description:
-      path: "internal_package/flutter_updater"
-      relative: true
-    source: path
+      path: "."
+      ref: master
+      resolved-ref: "69f86ffcd7d2aa1cd215267b253d20f891c655db"
+      url: "https://github.com/dmitryudin/flutter_updater.git"
+    source: git
     version: "0.0.1"
   flutter_vpn:
     dependency: "direct main"
