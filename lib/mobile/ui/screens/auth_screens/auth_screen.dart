@@ -374,14 +374,35 @@ class _AuthScreenState extends State<AuthScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (_errorMessage != null) // Отображение ошибки
-                      Padding(
-                        padding: EdgeInsets.only(bottom: 20),
-                        child: Text(
-                          _errorMessage!,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: Colors.red,
-                            fontSize: 16,
+                      Container(
+                        margin: EdgeInsets.only(bottom: 20),
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: colorScheme.error.withOpacity(0.3),
+                            width: 1,
                           ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Iconsax.info_circle,
+                              color: colorScheme.error,
+                              size: 20,
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onErrorContainer,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     SizedBox(height: 20),
@@ -400,16 +421,16 @@ class _AuthScreenState extends State<AuthScreen> {
                       decoration: InputDecoration(
                         labelText: 'Email',
                         prefixIcon:
-                            Icon(Iconsax.sms, color: colorScheme.onSurface),
+                            Icon(Iconsax.sms, color: colorScheme.primary),
                         border: _buildBorder(colorScheme.outline),
                         enabledBorder: _buildBorder(colorScheme.outline),
-                        focusedBorder: _buildBorder(colorScheme.onPrimary),
+                        focusedBorder: _buildBorder(colorScheme.primary),
                         errorBorder: _buildBorder(colorScheme.error),
                         focusedErrorBorder: _buildBorder(colorScheme.error),
                         filled: true,
                         fillColor: colorScheme.surface,
                         floatingLabelStyle:
-                            TextStyle(color: colorScheme.onPrimary),
+                            TextStyle(color: colorScheme.primary),
                         labelStyle: TextStyle(
                             color: colorScheme.onSurface.withOpacity(0.7)),
                         contentPadding:
@@ -426,25 +447,23 @@ class _AuthScreenState extends State<AuthScreen> {
                       decoration: InputDecoration(
                         labelText: 'Пароль',
                         prefixIcon:
-                            Icon(Iconsax.lock, color: colorScheme.onSurface),
+                            Icon(Iconsax.lock, color: colorScheme.primary),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword ? Iconsax.eye : Iconsax.eye_slash,
-                            color: colorScheme.onSurface,
-                            // ? colorScheme.onSurface.withOpacity(0.5)
-                            // : colorScheme.primary,
+                            color: colorScheme.onSurface.withOpacity(0.6),
                           ),
                           onPressed: _togglePasswordVisibility,
                         ),
                         border: _buildBorder(colorScheme.outline),
                         enabledBorder: _buildBorder(colorScheme.outline),
-                        focusedBorder: _buildBorder(colorScheme.onPrimary),
+                        focusedBorder: _buildBorder(colorScheme.primary),
                         errorBorder: _buildBorder(colorScheme.error),
                         focusedErrorBorder: _buildBorder(colorScheme.error),
                         filled: true,
                         fillColor: colorScheme.surface,
                         floatingLabelStyle:
-                            TextStyle(color: colorScheme.onPrimary),
+                            TextStyle(color: colorScheme.primary),
                         labelStyle: TextStyle(
                             color: colorScheme.onSurface.withOpacity(0.7)),
                         contentPadding:
@@ -463,11 +482,11 @@ class _AuthScreenState extends State<AuthScreen> {
                         controller: _confirmPasswordController,
                         decoration: InputDecoration(
                           labelText: 'Повторите пароль',
-                          prefixIcon: Icon(Iconsax.lock_1,
-                              color: colorScheme.onSurface),
+                          prefixIcon:
+                              Icon(Iconsax.lock_1, color: colorScheme.primary),
                           border: _buildBorder(colorScheme.outline),
                           enabledBorder: _buildBorder(colorScheme.outline),
-                          focusedBorder: _buildBorder(colorScheme.onPrimary),
+                          focusedBorder: _buildBorder(colorScheme.primary),
                           errorBorder: _buildBorder(colorScheme.error),
                           focusedErrorBorder: _buildBorder(colorScheme.error),
                           filled: true,
@@ -476,15 +495,13 @@ class _AuthScreenState extends State<AuthScreen> {
                               _obscurePassword
                                   ? Iconsax.eye
                                   : Iconsax.eye_slash,
-                              color: colorScheme.onSurface,
-                              // ? colorScheme.onSurface.withOpacity(0.5)
-                              // : colorScheme.primary,
+                              color: colorScheme.onSurface.withOpacity(0.6),
                             ),
                             onPressed: _togglePasswordVisibility,
                           ),
                           fillColor: colorScheme.surface,
                           floatingLabelStyle:
-                              TextStyle(color: colorScheme.onPrimary),
+                              TextStyle(color: colorScheme.primary),
                           labelStyle: TextStyle(
                               color: colorScheme.onSurface.withOpacity(0.7)),
                           contentPadding: EdgeInsets.symmetric(
@@ -502,16 +519,16 @@ class _AuthScreenState extends State<AuthScreen> {
                         decoration: InputDecoration(
                           labelText: 'Инвайт код',
                           prefixIcon:
-                              Icon(Iconsax.gift, color: colorScheme.onSurface),
+                              Icon(Iconsax.gift, color: colorScheme.primary),
                           border: _buildBorder(colorScheme.outline),
                           enabledBorder: _buildBorder(colorScheme.outline),
-                          focusedBorder: _buildBorder(colorScheme.onPrimary),
+                          focusedBorder: _buildBorder(colorScheme.primary),
                           errorBorder: _buildBorder(colorScheme.error),
                           focusedErrorBorder: _buildBorder(colorScheme.error),
                           filled: true,
                           fillColor: colorScheme.surface,
                           floatingLabelStyle:
-                              TextStyle(color: colorScheme.onPrimary),
+                              TextStyle(color: colorScheme.primary),
                           labelStyle: TextStyle(
                               color: colorScheme.onSurface.withOpacity(0.7)),
                           contentPadding: EdgeInsets.symmetric(
@@ -529,33 +546,61 @@ class _AuthScreenState extends State<AuthScreen> {
                       //   style: TextStyle(color: Colors.red),
                       // ),
                     ],
-                    ElevatedButton(
-                      onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool('seen_onboarding', true);
+                    SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('seen_onboarding', true);
 
-                        _isLoginMode ? _login() : _register();
-                      },
-                      child: Text(
-                        _isLoginMode ? 'Войти' : 'Зарегистрироваться',
-                        style: textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onPrimary,
+                          _isLoginMode ? _login() : _register();
+                        },
+                        icon: Icon(
+                          _isLoginMode ? Iconsax.login_1 : Iconsax.user_add,
+                          size: 20,
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-                        backgroundColor: colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
+                        label: Text(
+                          _isLoginMode ? 'Войти' : 'Зарегистрироваться',
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.onPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
+                    SizedBox(height: 12),
                     TextButton(
                       onPressed: _toggleMode,
-                      child: Text(
-                        _isLoginMode ? 'Создать аккаунт' : 'Уже есть аккаунт',
-                        style: textTheme.bodyMedium?.copyWith(),
+                      child: RichText(
+                        text: TextSpan(
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                          children: [
+                            TextSpan(
+                              text: _isLoginMode
+                                  ? 'Нет аккаунта? '
+                                  : 'Уже есть аккаунт? ',
+                            ),
+                            TextSpan(
+                              text: _isLoginMode ? 'Создать аккаунт' : 'Войти',
+                              style: TextStyle(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

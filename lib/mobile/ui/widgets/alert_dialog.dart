@@ -5,12 +5,15 @@ Future showCustomDialog(BuildContext context,
   return showDialog(
       context: context,
       builder: (BuildContext context) {
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
+        
         return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),
           elevation: 10,
-          backgroundColor: const Color.fromARGB(255, 244, 243, 243),
+          backgroundColor: colorScheme.surface,
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -26,7 +29,7 @@ Future showCustomDialog(BuildContext context,
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
+                    color: colorScheme.onSurface,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -37,7 +40,7 @@ Future showCustomDialog(BuildContext context,
                   '$message',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey[600],
+                    color: colorScheme.onSurface.withOpacity(0.7),
                     height: 1.4,
                   ),
                   textAlign: TextAlign.center,
@@ -49,7 +52,8 @@ Future showCustomDialog(BuildContext context,
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -57,12 +61,12 @@ Future showCustomDialog(BuildContext context,
                       elevation: 2,
                     ),
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text(
+                    child: Text(
                       'OK',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Color.fromARGB(255, 2, 2, 2),
+                        color: colorScheme.onPrimary,
                       ),
                     ),
                   ),

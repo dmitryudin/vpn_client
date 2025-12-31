@@ -40,24 +40,41 @@ class _ServerListState extends State<ServerList> {
             builder: (context, vpnState) {
               bool isEnabled =
                   vpnState.connectionState != FlutterVpnState.connected;
+
+              // Инициализация currentServer из состояния
+              ServerHttpModel? displayServer = currentServer;
               if (state is ScreenStateLoaded &&
                   state.rootModel?.servers?.isNotEmpty == true) {
-                selectedServer ??=
-                    state.rootModel?.servers?.first.id.toString();
-                if (BlocProvider.of<VpnBloc>(context).currentServer == null) {
-                  ServerHttpModel? tempServerHttpModel =
-                      state.rootModel?.servers?.first;
-                  if (tempServerHttpModel != null) {
-                    BlocProvider.of<VpnBloc>(context).currentServer =
-                        CurrentServer(
-                      host: tempServerHttpModel.url!,
-                      userName: tempServerHttpModel.username!,
-                      password: tempServerHttpModel.password!,
-                    );
-                    currentServer = tempServerHttpModel;
+                // Если currentServer еще не установлен, используем первый сервер
+                if (displayServer == null) {
+                  displayServer = state.rootModel?.servers?.first;
+                  if (displayServer != null) {
+                    selectedServer ??= displayServer.id.toString();
+                    // Устанавливаем в VpnBloc только если там еще нет
+                    if (BlocProvider.of<VpnBloc>(context).currentServer ==
+                        null) {
+                      BlocProvider.of<VpnBloc>(context).currentServer =
+                          CurrentServer(
+                        host: displayServer.url!,
+                        userName: displayServer.username!,
+                        password: displayServer.password!,
+                      );
+                    }
+                    // Обновляем локальное состояние
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() {
+                          currentServer = displayServer;
+                        });
+                      }
+                    });
                   }
+                } else {
+                  // Обновляем selectedServer если еще не установлен
+                  selectedServer ??= displayServer.id.toString();
                 }
               }
+
               switch (state.runtimeType) {
                 case ScreenStateInitial:
                   return const CupertinoActivityIndicator();
@@ -73,160 +90,182 @@ class _ServerListState extends State<ServerList> {
                     },
                   );
                 case ScreenStateLoaded:
+                  // Используем displayServer или первый сервер из списка
+                  final serverToShow = displayServer ??
+                      (state.rootModel?.servers?.isNotEmpty == true
+                          ? state.rootModel!.servers!.first
+                          : null);
+
+                  if (serverToShow == null) {
+                    return Text(
+                      'Серверы не найдены',
+                      style: TextStyle(color: textTheme.bodyMedium?.color),
+                    );
+                  }
+
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (currentServer != null)
-                        GestureDetector(
-                          onTap: isEnabled
-                              ? () {
-                                  showCupertinoModalPopup(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return CupertinoActionSheet(
-                                        title: Text(
-                                          'Выберите сервер',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            color: textTheme.bodyLarge?.color,
-                                          ),
-                                        ),
-                                        actions: [
-                                          for (final server
-                                              in state.rootModel!.servers!)
-                                            CupertinoActionSheetAction(
-                                              onPressed: () {
-                                                BlocProvider.of<VpnBloc>(
-                                                        context)
-                                                    .add(
-                                                  ChangeServerEvent(
-                                                    host: server.url ?? '',
-                                                    userName:
-                                                        server.username ?? '',
-                                                    password:
-                                                        server.password ?? '',
-                                                  ),
-                                                );
-                                                setState(() {
-                                                  selectedServer =
-                                                      server.id.toString();
-                                                  currentServer = server;
-                                                });
-                                                Navigator.pop(context);
-                                              },
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    getCountryFlag(
-                                                        server.country ?? ''),
-                                                    style: const TextStyle(
-                                                        fontSize: 20),
-                                                  ),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          server.name ??
-                                                              'No name',
-                                                          style: TextStyle(
-                                                            color: textTheme
-                                                                .bodyLarge
-                                                                ?.color,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          server.ip ?? '',
-                                                          style: TextStyle(
-                                                            fontSize: 12,
-                                                            color: textTheme
-                                                                .bodyMedium
-                                                                ?.color,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Icon(
-                                                    _getLoadIcon(
-                                                        server.load_coef ?? 0),
-                                                    color: _getLoadColor(
-                                                      server.load_coef ?? 0,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                        ],
-                                        cancelButton:
-                                            CupertinoActionSheetAction(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Text(
-                                            'Отмена',
-                                            style: TextStyle(
-                                              color: colorScheme.error,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                }
-                              : null,
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: colorScheme.surface,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  getCountryFlag(currentServer!.country ?? ''),
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        currentServer!.name ?? 'No name',
+                      GestureDetector(
+                        onTap: isEnabled
+                            ? () {
+                                showCupertinoModalPopup(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return CupertinoActionSheet(
+                                      title: Text(
+                                        'Выберите сервер',
                                         style: TextStyle(
+                                          fontSize: 18,
                                           color: textTheme.bodyLarge?.color,
                                         ),
                                       ),
-                                      Text(
-                                        currentServer!.ip ?? '',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: textTheme.bodyMedium?.color,
+                                      actions: [
+                                        for (final server
+                                            in state.rootModel!.servers!)
+                                          CupertinoActionSheetAction(
+                                            onPressed: () {
+                                              BlocProvider.of<VpnBloc>(context)
+                                                  .add(
+                                                ChangeServerEvent(
+                                                  host: server.url ?? '',
+                                                  userName:
+                                                      server.username ?? '',
+                                                  password:
+                                                      server.password ?? '',
+                                                ),
+                                              );
+                                              setState(() {
+                                                selectedServer =
+                                                    server.id.toString();
+                                                currentServer = server;
+                                              });
+                                              Navigator.pop(context);
+                                            },
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  getCountryFlag(
+                                                      server.country ?? ''),
+                                                  style: const TextStyle(
+                                                      fontSize: 20),
+                                                ),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        server.name ??
+                                                            'No name',
+                                                        style: TextStyle(
+                                                          color: textTheme
+                                                              .bodyLarge?.color,
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        server.ip ?? '',
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                          color: textTheme
+                                                              .bodyMedium
+                                                              ?.color,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Icon(
+                                                  _getLoadIcon(
+                                                      server.load_coef ?? 0),
+                                                  color: _getLoadColor(
+                                                    server.load_coef ?? 0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                      ],
+                                      cancelButton: CupertinoActionSheetAction(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text(
+                                          'Отмена',
+                                          style: TextStyle(
+                                            color: colorScheme.error,
+                                          ),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                Icon(
-                                  _getLoadIcon(currentServer!.load_coef ?? 0),
-                                  color: _getLoadColor(
-                                    currentServer!.load_coef ?? 0,
-                                  ),
-                                ),
-                              ],
+                                    );
+                                  },
+                                );
+                              }
+                            : null,
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: colorScheme.outline.withOpacity(0.2),
+                              width: 1,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                getCountryFlag(serverToShow.country ?? ''),
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      serverToShow.name ?? 'No name',
+                                      style: TextStyle(
+                                        color: textTheme.bodyLarge?.color,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      serverToShow.ip ?? '',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: textTheme.bodyMedium?.color
+                                            ?.withOpacity(0.7),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                _getLoadIcon(serverToShow.load_coef ?? 0),
+                                color: _getLoadColor(
+                                  serverToShow.load_coef ?? 0,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                      ),
                     ],
                   );
 

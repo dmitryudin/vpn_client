@@ -46,16 +46,15 @@ class _HomeScreenState extends State<HomeScreen> {
               key: _scaffoldKey,
               appBar: AppBar(
                 elevation: 0,
-                backgroundColor: theme.primaryColor,
+                backgroundColor: colorScheme.primary,
+                iconTheme: IconThemeData(color: colorScheme.onPrimary),
                 leading: IconButton(
                   onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                  icon: Icon(Iconsax.arrow_left_2,
-                      color: theme.textTheme.bodyLarge?.color),
+                  icon: Icon(Iconsax.arrow_left_2),
                 ),
                 actions: [
                   IconButton(
-                    icon: Icon(Iconsax.arrow_right_3,
-                        color: theme.textTheme.bodyLarge?.color),
+                    icon: Icon(Iconsax.arrow_right_3),
                     onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
                   ),
                 ],
