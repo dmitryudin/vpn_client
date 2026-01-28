@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:auth_feature/auth_feature.dart';
-import 'package:auth_feature/data/auth_data.dart';
 import 'package:auth_feature/data/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_updater/updater_repository.dart';
 import 'package:flutter_vpn/state.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:vpn/localization/app_localization.dart';
@@ -18,11 +16,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vpn/mobile/internal.dart';
 import 'package:vpn/mobile/ui/screens/updater_dialog/updater_dialog.dart';
 import 'package:vpn/mobile/ui/theme/app_theme.dart';
-import 'package:vpn/mobile/ui/widgets/alert_dialog.dart';
 import 'package:vpn/mobile/utils/bloc/screen_state_bloc.dart';
 import 'package:vpn/mobile/utils/vpn_bloc/vpn_bloc.dart';
 import 'package:vpn/mobile/utils/vpn_bloc/vpn_state.dart';
-import 'package:window_manager/window_manager.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 
 import 'mobile/ui/routes /app_router.dart';
@@ -96,12 +92,14 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  bool isDarkMode = false;
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  ThemeMode _themeMode = ThemeMode.system;
+  Brightness? _systemBrightness;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       checkUpdates(context);
     });
@@ -109,14 +107,66 @@ class _MyAppState extends State<MyApp> {
     // Configure the user privacy data policy before init sdk
     MobileAds.initialize();
 
+    // Получаем текущую системную яркость
+    _systemBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    
     _loadThemeMode();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    // Обновляем системную яркость при изменении
+    final newBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    
+    if (_themeMode == ThemeMode.system) {
+      setState(() {
+        _systemBrightness = newBrightness;
+        // Принудительно обновляем состояние для применения новой темы
+      });
+    }
   }
 
   void _loadThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
+    final savedThemeMode = prefs.getString('themeMode');
+
     setState(() {
-      isDarkMode = prefs.getBool('isDarkMode') ?? false;
+      if (savedThemeMode == 'light') {
+        _themeMode = ThemeMode.light;
+      } else if (savedThemeMode == 'dark') {
+        _themeMode = ThemeMode.dark;
+      } else {
+        // По умолчанию системная тема
+        _themeMode = ThemeMode.system;
+      }
     });
+  }
+
+  // Определяем эффективную тему с учетом системной яркости
+  // Для iOS явно проверяем системную яркость, так как ThemeMode.system может работать некорректно
+  ThemeMode get _effectiveThemeMode {
+    if (_themeMode == ThemeMode.system) {
+      // Всегда получаем актуальную системную яркость
+      final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      // Обновляем кэшированное значение
+      if (_systemBrightness != brightness) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _systemBrightness = brightness;
+            });
+          }
+        });
+      }
+      return brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
+    }
+    return _themeMode;
   }
 
   @override
@@ -164,7 +214,7 @@ class _MyAppState extends State<MyApp> {
         ],
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
-        themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+        themeMode: _effectiveThemeMode,
       ),
     );
   }

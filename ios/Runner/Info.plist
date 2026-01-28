@@ -43,6 +43,30 @@
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>itms-apps</string>
+        <string>shortcuts</string>
+        <string>youtube</string>
+        <string>instagram</string>
+        <string>fb</string>
+        <string>tiktok</string>
+        <string>tg</string>
+        <string>twitter</string>
+        <string>linkedin</string>
+        <string>reddit</string>
+        <string>twitch</string>
+        <string>github</string>
+    </array>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLName</key>
+            <string>com.example.vpn</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>cryptonvpn</string>
+            </array>
+        </dict>
     </array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

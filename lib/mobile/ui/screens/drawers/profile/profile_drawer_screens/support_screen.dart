@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:vpn/mobile/ui/widgets/animated_back_button.dart';
 
 class SupportScreen extends StatefulWidget {
   @override
@@ -12,26 +12,14 @@ class _SupportScreenState extends State<SupportScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    bool isExpanded = false;
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Поддержка'),
         backgroundColor: colorScheme.primary,
         elevation: 0,
-        leading: IconButton(
-          icon: AnimatedRotation(
-            duration: Duration(milliseconds: 300),
-            turns: isExpanded ? 0.5 : 0,
-            child: Icon(Icons.keyboard_arrow_down_outlined,
-                color: colorScheme.onPrimary),
-          ),
-          onPressed: () {
-            setState(() {
-              isExpanded = !isExpanded;
-            });
-            context.pop();
-          },
+        leading: AnimatedBackButton(
+          iconColor: colorScheme.onPrimary,
         ),
       ),
       body: Padding(

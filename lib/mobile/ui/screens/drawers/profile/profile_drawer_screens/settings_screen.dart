@@ -5,10 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/localization/app_localization.dart';
-import 'package:vpn/main.dart';
+import 'package:vpn/mobile/ui/widgets/enhanced_dropdown.dart';
+import 'package:vpn/mobile/ui/widgets/animated_card.dart';
+import 'package:vpn/mobile/ui/widgets/animated_back_button.dart';
 
 import 'package:vpn/mobile/utils/bloc/screen_state_bloc.dart';
 
@@ -19,11 +20,11 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool adBlockEnabled = false;
-  bool isExpanded = false;
   bool killSwitchEnabled = false;
-  bool isDarkMode = false;
+  String selectedThemeMode = 'Системная';
   String selectedLanguage = 'Русский';
   final List<String> languages = ['Русский', 'English'];
+  final List<String> themeModes = ['Системная', 'Светлая', 'Тёмная'];
 
   @override
   void initState() {
@@ -42,8 +43,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _loadThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
+    final savedThemeMode = prefs.getString('themeMode') ?? 'system';
     setState(() {
-      isDarkMode = prefs.getBool('isDarkMode') ?? false;
+      if (savedThemeMode == 'light') {
+        selectedThemeMode = 'Светлая';
+      } else if (savedThemeMode == 'dark') {
+        selectedThemeMode = 'Тёмная';
+      } else {
+        selectedThemeMode = 'Системная';
+      }
     });
   }
 
@@ -63,13 +71,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _toggleTheme(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isDarkMode', value);
-    setState(() {
-      isDarkMode = value;
-    });
-    Phoenix.rebirth(context);
+  void _changeThemeMode(String? newThemeMode) async {
+    if (newThemeMode != null) {
+      final prefs = await SharedPreferences.getInstance();
+      String themeModeValue;
+      if (newThemeMode == 'Светлая') {
+        themeModeValue = 'light';
+      } else if (newThemeMode == 'Тёмная') {
+        themeModeValue = 'dark';
+      } else {
+        themeModeValue = 'system';
+      }
+      
+      await prefs.setString('themeMode', themeModeValue);
+      setState(() {
+        selectedThemeMode = newThemeMode;
+      });
+      // Перезапускаем приложение для применения темы
+      if (mounted) {
+        Phoenix.rebirth(context);
+      }
+    }
   }
 
   @override
@@ -88,44 +110,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         elevation: 0,
         backgroundColor: colorScheme.primary,
-        leading: IconButton(
-          icon: AnimatedRotation(
-            duration: Duration(milliseconds: 300),
-            turns: isExpanded ? 0.5 : 0,
-            child: Icon(Icons.keyboard_arrow_down_outlined,
-                color: colorScheme.onPrimary),
-          ),
-          onPressed: () {
-            setState(() {
-              isExpanded = !isExpanded;
-            });
-            context.pop();
-          },
+        leading: AnimatedBackButton(
+          iconColor: colorScheme.onPrimary,
         ),
       ),
       body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              colorScheme.background,
+              colorScheme.surfaceVariant,
+            ],
+          ),
+        ),
         child: ListView(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           children: [
-            _buildSettingsCard(
-              AppLocalization.translate('language', 'ru'),
-              DropdownButton<String>(
+            AnimatedCard(
+              padding: EdgeInsets.zero,
+              backgroundColor: Colors.transparent,
+              child: EnhancedDropdown<String>(
                 value: selectedLanguage,
-                items: languages.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
+                items: languages,
+                itemBuilder: (item) => item,
                 onChanged: _changeLanguage,
+                label: AppLocalization.translate('language', 'ru'),
+                icon: Icons.language_rounded,
               ),
             ),
-            SizedBox(height: 16),
-            _buildSwitchCard(
-              'Темная тема',
-              'Переключить светлую/темную тему',
-              isDarkMode,
-              _toggleTheme,
+            const SizedBox(height: 16),
+            AnimatedCard(
+              padding: EdgeInsets.zero,
+              backgroundColor: Colors.transparent,
+              child: EnhancedDropdown<String>(
+                value: selectedThemeMode,
+                items: themeModes,
+                itemBuilder: (item) => item,
+                onChanged: _changeThemeMode,
+                label: 'Тема приложения',
+                icon: Icons.palette_rounded,
+              ),
             ),
             SizedBox(height: 16),
             _buildSwitchCard(
@@ -235,24 +261,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingsCard(String title, Widget trailing) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Card(
-      elevation: 4,
-      color: colorScheme.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        title: Text(title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-            )),
-        trailing: trailing,
-      ),
-    );
-  }
 
   Widget _buildSwitchCard(
       String title, String subtitle, bool value, Function(bool) onChanged) {
