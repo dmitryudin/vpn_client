@@ -25,7 +25,6 @@ class _AuthScreenState extends State<AuthScreen> {
   final _confirmPasswordController = TextEditingController();
   final _inviteCodeController = TextEditingController();
 
-  bool _isRegistered = false;
   bool _isLoginMode = false;
   String? _errorMessage; // Для хранения сообщения об ошибке
 
@@ -38,10 +37,7 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _checkRegistrationStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isRegistered = prefs.getBool('is_registered') ?? false;
-    });
+    // Метод оставлен для возможного будущего использования
   }
 
   Future<void> _register() async {
@@ -315,6 +311,16 @@ class _AuthScreenState extends State<AuthScreen> {
     return null;
   }
 
+  String _getPasswordStrength(String password) {
+    if (password.length < 6) {
+      return 'Слабый пароль (минимум 6 символов)';
+    } else if (password.length < 10) {
+      return 'Средний пароль';
+    } else {
+      return 'Сильный пароль';
+    }
+  }
+
   OutlineInputBorder _buildBorder(Color color) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
@@ -405,9 +411,17 @@ class _AuthScreenState extends State<AuthScreen> {
                           ],
                         ),
                       ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     TextFormField(
                       controller: _emailController,
+                      onChanged: (value) {
+                        // Валидация в реальном времени
+                        if (value.isNotEmpty) {
+                          setState(() {
+                            // Обновляем состояние для перерисовки
+                          });
+                        }
+                      },
                       inputFormatters: [
                         FilteringTextInputFormatter.deny(
                             RegExp(r'\s')), // Блокирует пробелы
@@ -434,16 +448,22 @@ class _AuthScreenState extends State<AuthScreen> {
                         labelStyle: TextStyle(
                             color: colorScheme.onSurface.withOpacity(0.7)),
                         contentPadding:
-                            EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                            const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                       ),
                       style: textTheme.bodyLarge
                           ?.copyWith(color: colorScheme.onSurface),
                       cursorColor: colorScheme.onSurface,
                       validator: _validateEmail,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     TextFormField(
                       controller: _passwordController,
+                      onChanged: (value) {
+                        setState(() {
+                          // Обновляем для показа силы пароля
+                        });
+                      },
                       decoration: InputDecoration(
                         labelText: 'Пароль',
                         prefixIcon:
@@ -467,7 +487,11 @@ class _AuthScreenState extends State<AuthScreen> {
                         labelStyle: TextStyle(
                             color: colorScheme.onSurface.withOpacity(0.7)),
                         contentPadding:
-                            EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                            const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                        helperText: !_isLoginMode && _passwordController.text.isNotEmpty
+                            ? _getPasswordStrength(_passwordController.text)
+                            : null,
+                        helperMaxLines: 1,
                       ),
                       obscureText:
                           _obscurePassword, // Используем состояние здесь
@@ -475,11 +499,17 @@ class _AuthScreenState extends State<AuthScreen> {
                           ?.copyWith(color: colorScheme.onSurface),
                       cursorColor: colorScheme.onSurface,
                       validator: _validatePassword,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
-                    if (!_isLoginMode) ...[
-                      SizedBox(height: 20),
+                      if (!_isLoginMode) ...[
+                      const SizedBox(height: 20),
                       TextFormField(
                         controller: _confirmPasswordController,
+                        onChanged: (value) {
+                          setState(() {
+                            // Обновляем для валидации совпадения паролей
+                          });
+                        },
                         decoration: InputDecoration(
                           labelText: 'Повторите пароль',
                           prefixIcon:
@@ -504,7 +534,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               TextStyle(color: colorScheme.primary),
                           labelStyle: TextStyle(
                               color: colorScheme.onSurface.withOpacity(0.7)),
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                               vertical: 16, horizontal: 20),
                         ),
                         obscureText: _obscurePassword,
@@ -512,8 +542,9 @@ class _AuthScreenState extends State<AuthScreen> {
                             ?.copyWith(color: colorScheme.onSurface),
                         cursorColor: colorScheme.onSurface,
                         validator: _validateConfirmPassword,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       TextFormField(
                         controller: _inviteCodeController,
                         decoration: InputDecoration(
@@ -546,7 +577,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       //   style: TextStyle(color: Colors.red),
                       // ),
                     ],
-                    SizedBox(height: 8),
+                      const SizedBox(height: 8),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(

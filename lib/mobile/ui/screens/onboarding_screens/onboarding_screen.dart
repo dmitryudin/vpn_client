@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vpn/mobile/ui/widgets/fade_in_widget.dart';
+import 'package:vpn/mobile/ui/widgets/animated_card.dart';
 
 class OnboardingScreen extends StatefulWidget {
   @override
@@ -16,24 +18,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       description:
           "Мы всегда стремимся защитить вашу конфиденциальность и ваши данные. Работайте с нами на любом из ваших устройств — Mac, iOS или Android.",
       image: "assets/images/coins.png",
+      icon: Icons.security_rounded,
     ),
     OnboardingPage(
-      title: "Лучшие сервера",
+      title: "Лучшие серверы",
       description:
           "Используем самые современные протоколы обфускации и шифрования. Ваши данные всегда под защитой, где бы вы ни находились.",
       image: "assets/images/coins.png",
+      icon: Icons.dns_rounded,
     ),
     OnboardingPage(
       title: "Серверы по всему миру",
       description:
           "Выбирайте любой из доступных серверов в более чем 30 странах мира. Наслаждайтесь высокой скоростью и стабильностью соединения.",
       image: "assets/images/coins.png",
+      icon: Icons.public_rounded,
     ),
     OnboardingPage(
       title: "Премиум подписка",
       description:
           "Получите полный доступ ко всем серверам и функциям. Работайте одновременно с трех устройств на одном аккаунте.",
       image: "assets/images/coins.png",
+      icon: Icons.star_rounded,
       isLast: true,
     ),
   ];
@@ -41,14 +47,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void seen_onboarding(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('seen_onboarding', true);
-    context.go('/'); // Переход на главный экран
+    context.go('/');
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      body: Stack(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primary,
+              colorScheme.primary.withOpacity(0.8),
+              colorScheme.background,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Stack(
         children: [
           PageView.builder(
             controller: _pageController,
@@ -64,15 +92,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           if (_currentPage == _pages.length - 1)
             Positioned(
-              top: 40,
-              left: 20,
-              child: IconButton(
-                icon: Icon(Icons.close, color: theme.colorScheme.onBackground),
-                onPressed: () async {
+                  top: 20,
+                  right: 20,
+                  child: FadeInWidget(
+                    delay: const Duration(milliseconds: 300),
+                    child: AnimatedCard(
+                      padding: EdgeInsets.zero,
+                      borderRadius: BorderRadius.circular(30),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () async {
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setBool('seen_onboarding', true);
                   context.go('/');
                 },
+                          borderRadius: BorderRadius.circular(30),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Icon(
+                              Icons.close_rounded,
+                              color: colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
               ),
             ),
           Positioned(
@@ -82,48 +131,83 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: Column(
               children: [
                 if (_currentPage == _pages.length - 1)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40.0, vertical: 10.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: theme.colorScheme.onSecondary,
-                        backgroundColor: theme.colorScheme.secondary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                          side: BorderSide(color: theme.colorScheme.secondary),
-                        ),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-                        elevation: 5,
-                      ),
-                      onPressed: () async {
+                      FadeInWidget(
+                        delay: const Duration(milliseconds: 200),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                          child: AnimatedCard(
+                            padding: EdgeInsets.zero,
+                            borderRadius: BorderRadius.circular(30),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    colorScheme.onPrimary,
+                                    colorScheme.onPrimary.withOpacity(0.9),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () async {
                         context.go('/auth');
                       },
+                                  borderRadius: BorderRadius.circular(30),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 18,
+                                      horizontal: 30,
+                                    ),
                       child: Text(
                         'Регистрация/Войти',
-                        style: TextStyle(
-                          fontSize: 16,
+                                      textAlign: TextAlign.center,
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        color: colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-                SizedBox(height: 20),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     _pages.length,
                     (index) => AnimatedContainer(
-                      duration: Duration(milliseconds: 300),
-                      margin: EdgeInsets.symmetric(horizontal: 5),
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
                       height: 8,
-                      width: _currentPage == index ? 24 : 8,
+                          width: _currentPage == index ? 32 : 8,
                       decoration: BoxDecoration(
                         color: _currentPage == index
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
+                                ? colorScheme.onPrimary
+                                : colorScheme.onPrimary.withOpacity(0.4),
                         borderRadius: BorderRadius.circular(4),
+                            boxShadow: _currentPage == index
+                                ? [
+                                    BoxShadow(
+                                      color: colorScheme.onPrimary.withOpacity(0.5),
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    ),
+                                  ]
+                                : null,
                       ),
                     ),
                   ),
@@ -132,6 +216,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
         ],
+          ),
+        ),
       ),
     );
   }
@@ -142,102 +228,84 @@ class OnboardingPage extends StatelessWidget {
   final String description;
   final String image;
   final bool isLast;
+  final IconData icon;
 
   OnboardingPage({
     required this.title,
     required this.description,
     required this.image,
     this.isLast = false,
+    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Stack(
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Фоновое изображение (только для первого экрана)
-        if (title == "Безопасно и надежно")
-          Positioned.fill(
-            child: Align(
-              alignment:
-                  Alignment.topCenter, // Выравниваем изображение по верху
-              child: Padding(
-                padding: EdgeInsets.only(top: 50), // Отступ сверху
-                child: Image.asset(
-                  'assets/icons/onboarding_1.png', // Путь к фоновому изображению
-                  fit: BoxFit.contain, // Сохраняем пропорции изображения
+          FadeInWidget(
+            delay: const Duration(milliseconds: 100),
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    colorScheme.onPrimary.withOpacity(0.2),
+                    colorScheme.onPrimary.withOpacity(0.1),
+                  ],
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.onPrimary.withOpacity(0.3),
+                    blurRadius: 30,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              child: Icon(
+                icon,
+                size: 100,
+                color: colorScheme.onPrimary,
               ),
             ),
           ),
-        if (title == "Лучшие сервера")
-          Positioned.fill(
-            child: Align(
-              alignment:
-                  Alignment.topCenter, // Выравниваем изображение по верху
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(50, 70, 0, 0), // Отступ сверху
-                child: Image.asset(
-                  'assets/icons/onboarding_2.png', // Путь к фоновому изображению
-                  fit: BoxFit.contain, // Сохраняем пропорции изображения
-                ),
+          const SizedBox(height: 60),
+          FadeInWidget(
+            delay: const Duration(milliseconds: 200),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onPrimary,
+                letterSpacing: 0.5,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
-        if (title == "Серверы по всему миру")
-          Positioned.fill(
-            child: Align(
-              alignment:
-                  Alignment.topCenter, // Выравниваем изображение по верху
-              child: Padding(
-                padding: EdgeInsets.only(top: 50), // Отступ сверху
-                child: Image.asset(
-                  'assets/icons/onboarding_3.png', // Путь к фоновому изображению
-                  fit: BoxFit.contain, // Сохраняем пропорции изображения
-                ),
+          const SizedBox(height: 24),
+          FadeInWidget(
+            delay: const Duration(milliseconds: 300),
+            child: Text(
+              description,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: colorScheme.onPrimary.withOpacity(0.9),
+                height: 1.6,
+                letterSpacing: 0.3,
               ),
             ),
-          ),
-        if (title == "Премиум подписка")
-          Positioned.fill(
-            child: Align(
-              alignment:
-                  Alignment.topCenter, // Выравниваем изображение по верху
-              child: Padding(
-                padding: EdgeInsets.only(top: 50), // Отступ сверху
-                child: Image.asset(
-                  'assets/icons/onboarding_4.gif', // Путь к фоновому изображению
-                  fit: BoxFit.contain, // Сохраняем пропорции изображения
-                ),
-              ),
-            ),
-          ),
-        Padding(
-          padding: EdgeInsets.all(40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(image, height: 200), // Основное изображение
-              SizedBox(height: 40),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onBackground,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                description,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 16, color: theme.colorScheme.onBackground),
               ),
             ],
           ),
-        ),
-      ],
     );
   }
 }

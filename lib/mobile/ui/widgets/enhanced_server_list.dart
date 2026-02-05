@@ -9,6 +9,8 @@ import 'package:vpn_engine/from_server/api_server/models/server_http_model.dart'
 import '../../utils/vpn_bloc/vpn_state.dart';
 import 'animated_card.dart';
 import 'fade_in_widget.dart';
+import 'skeleton_loader.dart';
+import 'empty_state.dart';
 
 /// Улучшенный список серверов с современным UX
 class EnhancedServerList extends StatefulWidget {
@@ -129,22 +131,7 @@ class _EnhancedServerListState extends State<EnhancedServerList>
   }
 
   Widget _buildLoadingState(ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Center(
-        child: CircularProgressIndicator(
-          color: colorScheme.primary,
-        ),
-      ),
-    );
+    return const ServerCardSkeleton();
   }
 
   Widget _buildErrorState(
@@ -152,67 +139,27 @@ class _EnhancedServerListState extends State<EnhancedServerList>
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.error.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.error_outline_rounded,
-            color: colorScheme.error,
-            size: 48,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Ошибка загрузки серверов',
-            style: textTheme.titleMedium?.copyWith(
-              color: colorScheme.onErrorContainer,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton.icon(
-            onPressed: () {
-              context.read<ScreenStateBloc>().add(LoadServerList());
-            },
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Повторить'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
-            ),
-          ),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.error_outline_rounded,
+      title: 'Ошибка загрузки серверов',
+      message: 'Произошла ошибка при загрузке списка серверов. Проверьте подключение к интернету.',
+      actionLabel: 'Повторить',
+      onAction: () {
+        context.read<ScreenStateBloc>().add(LoadServerList());
+      },
+      iconColor: colorScheme.error,
     );
   }
 
   Widget _buildEmptyState(ColorScheme colorScheme, TextTheme textTheme) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Center(
-        child: Text(
-          'Серверы не найдены',
-          style: textTheme.bodyLarge?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
+    return EmptyState(
+      icon: Icons.cloud_off_rounded,
+      title: 'Серверы не найдены',
+      message: 'Не удалось загрузить список серверов. Проверьте подключение к интернету и попробуйте снова.',
+      actionLabel: 'Обновить',
+      onAction: () {
+        context.read<ScreenStateBloc>().add(LoadServerList());
+      },
     );
   }
 
@@ -251,7 +198,7 @@ class _EnhancedServerListState extends State<EnhancedServerList>
                 }
               : null,
           padding: const EdgeInsets.all(20),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           backgroundColor: colorScheme.surface,
           child: Row(
             children: [
@@ -307,20 +254,9 @@ class _EnhancedServerListState extends State<EnhancedServerList>
               ),
               
               // Индикатор загрузки
-              Column(
-                children: [
-                  _buildLoadIndicator(
-                    server.load_coef ?? 0,
-                    colorScheme,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _getLoadText(server.load_coef ?? 0),
-                    style: textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+              _buildLoadIndicator(
+                server.load_coef ?? 0,
+                colorScheme,
               ),
               
               if (isEnabled) ...[
@@ -341,24 +277,27 @@ class _EnhancedServerListState extends State<EnhancedServerList>
     Color color;
     IconData icon;
     
+    // loadCoef: чем меньше значение, тем ниже загрузка сервера и выше скорость
+    // Низкая загрузка (loadCoef < 0.4) = высокая скорость = полная иконка WiFi (4 полоски)
+    // Средняя загрузка (0.4 <= loadCoef < 0.7) = средняя скорость = 2 полоски
+    // Высокая загрузка (loadCoef >= 0.7) = низкая скорость = 1 полоска
+    
+    // Логика: меньше loadCoef = лучше = больше полосок WiFi
     if (loadCoef < 0.4) {
+      // Низкая загрузка - высокая скорость - лучший сигнал
       color = Colors.green;
-      icon = Icons.wifi;
+      icon = Icons.wifi; // Полная иконка WiFi - максимальный сигнал
     } else if (loadCoef < 0.7) {
+      // Средняя загрузка - средняя скорость - средний сигнал
       color = Colors.orange;
-      icon = Icons.wifi_2_bar;
+      icon = Icons.wifi_2_bar; // 2 полоски - средний сигнал
     } else {
+      // Высокая загрузка - низкая скорость - слабый сигнал
       color = colorScheme.error;
-      icon = Icons.wifi_1_bar;
+      icon = Icons.wifi_1_bar; // 1 полоска - минимальный сигнал
     }
     
     return Icon(icon, color: color, size: 24);
-  }
-
-  String _getLoadText(double loadCoef) {
-    if (loadCoef < 0.4) return 'Низкая';
-    if (loadCoef < 0.7) return 'Средняя';
-    return 'Высокая';
   }
 
   void _showServerSelectionSheet(
@@ -388,7 +327,7 @@ class _EnhancedServerListState extends State<EnhancedServerList>
           children: [
             // Handle
             Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              margin: const EdgeInsets.only(top: 12, bottom: 12),
               width: 40,
               height: 4,
               decoration: BoxDecoration(
@@ -399,7 +338,7 @@ class _EnhancedServerListState extends State<EnhancedServerList>
             
             // Заголовок
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
                 children: [
                   Text(
@@ -472,8 +411,9 @@ class _EnhancedServerListState extends State<EnhancedServerList>
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
             color: isSelected
-                ? colorScheme.primaryContainer.withOpacity(0.3)
+                ? colorScheme.primaryContainer.withOpacity(0.2)
                 : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vpn/mobile/ui/widgets/animated_back_button.dart';
 import 'package:vpn/mobile/ui/widgets/animated_card.dart';
 import 'package:vpn/mobile/ui/widgets/fade_in_widget.dart';
+import 'package:vpn/mobile/ui/widgets/enhanced_toast.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'dart:io';
 
@@ -62,8 +63,8 @@ class _ShortcutsAutomationSectionState
   final Map<String, ServiceInfo> _services = {
     'YouTube': ServiceInfo(
       name: 'YouTube',
-      icon: Icons.play_circle_filled,
-      color: Colors.red,
+                icon: Icons.play_circle_filled,
+                color: Colors.red,
       domains: [
         'youtube.com',
         'www.youtube.com',
@@ -79,7 +80,7 @@ class _ShortcutsAutomationSectionState
     ),
     'Instagram': ServiceInfo(
       name: 'Instagram',
-      icon: Icons.camera_alt,
+                icon: Icons.camera_alt,
       color: Color(0xFFE4405F),
       domains: [
         'instagram.com',
@@ -98,7 +99,7 @@ class _ShortcutsAutomationSectionState
     ),
     'Facebook': ServiceInfo(
       name: 'Facebook',
-      icon: Icons.facebook,
+                icon: Icons.facebook,
       color: Color(0xFF1877F2),
       domains: [
         'facebook.com',
@@ -118,7 +119,7 @@ class _ShortcutsAutomationSectionState
     'TikTok': ServiceInfo(
       name: 'TikTok',
       icon: Icons.music_note,
-      color: Colors.black,
+                color: Colors.black,
       domains: [
         'tiktok.com',
         'www.tiktok.com',
@@ -209,7 +210,7 @@ class _ShortcutsAutomationSectionState
     'GitHub': ServiceInfo(
       name: 'GitHub',
       icon: Icons.code,
-      color: Colors.black,
+                color: Colors.black,
       domains: [
         'github.com',
         'www.github.com',
@@ -286,21 +287,21 @@ class _ShortcutsAutomationSectionState
             delay: const Duration(milliseconds: 50),
             child: _buildHeader(context, theme, colorScheme),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           // Список сервисов
           FadeInWidget(
             delay: const Duration(milliseconds: 100),
             child: _buildServicesGrid(context, theme, colorScheme),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           // Кнопка настройки
           if (_selected.isNotEmpty)
             FadeInWidget(
               delay: const Duration(milliseconds: 150),
               child: _buildSetupButton(context, theme, colorScheme),
-            ),
+          ),
         ],
       ),
     );
@@ -318,22 +319,25 @@ class _ShortcutsAutomationSectionState
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
                       colorScheme.primary,
-                      colorScheme.primary.withOpacity(0.7),
+                      colorScheme.primary.withOpacity(0.8),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
-                      color: colorScheme.primary.withOpacity(0.3),
-                      blurRadius: 12,
+                      color: colorScheme.primary.withOpacity(0.25),
+                      blurRadius: 16,
                       offset: const Offset(0, 4),
+                      spreadRadius: 0,
                     ),
                   ],
                 ),
                 child: Icon(
-                  Icons.auto_awesome,
+                  Icons.auto_awesome_rounded,
                   color: colorScheme.onPrimary,
                   size: 32,
                 ),
@@ -348,13 +352,15 @@ class _ShortcutsAutomationSectionState
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: colorScheme.onSurface,
+                        fontSize: 22,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
                       'Через приложение Команды',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.7),
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 14,
                       ),
                     ),
                   ],
@@ -364,35 +370,65 @@ class _ShortcutsAutomationSectionState
           ),
           const SizedBox(height: 20),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colorScheme.primaryContainer.withOpacity(0.6),
+                  colorScheme.primaryContainer.withOpacity(0.3),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: colorScheme.primary.withOpacity(0.2),
-                width: 1,
+                width: 1.5,
               ),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.lightbulb_outline,
-                  color: colorScheme.primary,
-                  size: 24,
+          child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                  padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Выберите приложения, для которых VPN будет включаться автоматически',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.8),
-                      height: 1.4,
-                    ),
+                child: Icon(
+                    Icons.lightbulb_rounded,
+                    color: colorScheme.primary,
+                    size: 22,
                   ),
                 ),
-              ],
-            ),
+                const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                        'Как это работает',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                          fontSize: 15,
+                      ),
+                    ),
+                      const SizedBox(height: 6),
+                    Text(
+                        'Выберите приложения, для которых VPN будет включаться автоматически при открытии',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.5,
+                          fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
+        ),
         ],
       ),
     );
@@ -402,18 +438,44 @@ class _ShortcutsAutomationSectionState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Выберите сервисы',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurface,
-          ),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.apps_rounded,
+                color: colorScheme.primary,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Выберите сервисы',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+                fontSize: 20,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: _services.entries.map((entry) {
+        const SizedBox(height: 20),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.85,
+          ),
+          itemCount: _services.length,
+          itemBuilder: (context, index) {
+            final entry = _services.entries.elementAt(index);
             final serviceName = entry.key;
             final serviceInfo = entry.value;
             final isSelected = _selected.contains(serviceName);
@@ -426,24 +488,36 @@ class _ShortcutsAutomationSectionState
               serviceInfo,
               isSelected,
             );
-          }).toList(),
+          },
         ),
         if (_selected.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                'Выбрано: ${_selected.length} из ${_services.length}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+          const SizedBox(height: 20),
+          AnimatedCard(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                  padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
                 ),
-              ),
+                child: Icon(
+                    Icons.check_circle_rounded,
+                    color: colorScheme.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Выбрано: ${_selected.length} из ${_services.length}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -473,108 +547,201 @@ class _ShortcutsAutomationSectionState
       },
       padding: EdgeInsets.zero,
       margin: EdgeInsets.zero,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: (MediaQuery.of(context).size.width - 52) / 2,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
         decoration: BoxDecoration(
           color: isSelected
-              ? serviceInfo.color.withOpacity(0.1)
+              ? colorScheme.primaryContainer.withOpacity(0.5)
               : colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? serviceInfo.color
-                : colorScheme.outline.withOpacity(0.2),
-            width: isSelected ? 2 : 1,
+                ? colorScheme.primary
+                : colorScheme.outline.withOpacity(0.15),
+            width: isSelected ? 2.5 : 1,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: colorScheme.primary.withOpacity(0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                    spreadRadius: 0,
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                    spreadRadius: 0,
+                  ),
+                ],
         ),
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                  children: [
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: serviceInfo.color.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: serviceInfo.color.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Icon(
                           serviceInfo.icon,
                           color: serviceInfo.color,
-                          size: 24,
+                          size: 26,
                         ),
                       ),
                       const Spacer(),
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        width: 24,
-                        height: 24,
+                        curve: Curves.easeInOut,
+                        width: 26,
+                        height: 26,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: isSelected
-                              ? serviceInfo.color
+                              ? colorScheme.primary
                               : Colors.transparent,
                           border: Border.all(
                             color: isSelected
-                                ? serviceInfo.color
-                                : colorScheme.outline,
-                            width: 2,
+                                ? colorScheme.primary
+                                : colorScheme.outline.withOpacity(0.4),
+                            width: 2.5,
                           ),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: colorScheme.primary.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: isSelected
                             ? Icon(
-                                Icons.check,
-                                size: 16,
-                                color: Colors.white,
+                                Icons.check_rounded,
+                                size: 18,
+                                color: colorScheme.onPrimary,
                               )
                             : null,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
+                  const SizedBox(height: 16),
+                    Text(
                     serviceInfo.name,
                     style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      color: isSelected
+                          ? colorScheme.primary
+                          : colorScheme.onSurface,
+                      fontSize: 15,
+                      letterSpacing: 0.2,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${serviceInfo.domains.length} доменов',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.6),
-                      fontSize: 11,
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
                     ),
-                  ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? colorScheme.primary.withOpacity(0.1)
+                          : colorScheme.surfaceVariant.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.language_rounded,
+                          size: 12,
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                    Text(
+                          '${serviceInfo.domains.length} доменов',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                            color: isSelected
+                                ? colorScheme.primary
+                                : colorScheme.onSurfaceVariant,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
                 ],
               ),
             ),
             if (isSelected)
               Positioned(
-                top: 8,
-                right: 8,
-                child: AnimatedCard(
-                  onTap: () => _installAutomationForApp(serviceName),
-                  padding: EdgeInsets.zero,
-                  margin: EdgeInsets.zero,
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: serviceInfo.color,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.download,
-                      color: Colors.white,
-                      size: 16,
+                top: 10,
+                right: 10,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.elasticOut,
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: child,
+                    );
+                  },
+                  child: AnimatedCard(
+                    onTap: () => _installAutomationForApp(serviceName),
+                    padding: EdgeInsets.zero,
+                    margin: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(22),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            colorScheme.primary,
+                            colorScheme.primary.withOpacity(0.85),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withOpacity(0.4),
+                            blurRadius: 10,
+                            spreadRadius: 1,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.settings_rounded,
+                        color: colorScheme.onPrimary,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),
@@ -590,44 +757,56 @@ class _ShortcutsAutomationSectionState
       onTap: _selected.isEmpty ? null : _installAllSelected,
       padding: EdgeInsets.zero,
       margin: EdgeInsets.zero,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
               colorScheme.primary,
-              colorScheme.primary.withOpacity(0.8),
+              colorScheme.primary.withOpacity(0.85),
             ],
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: colorScheme.primary.withOpacity(0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+              spreadRadius: 0,
             ),
           ],
         ),
-        child: Row(
+          child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.settings_outlined,
-              color: colorScheme.onPrimary,
-              size: 22,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Настроить автоматизацию',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+            children: [
+              Container(
+              padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                Icons.settings_rounded,
                 color: colorScheme.onPrimary,
+                size: 22,
               ),
             ),
-          ],
-        ),
+            const SizedBox(width: 14),
+                    Text(
+              'Настроить автоматизацию',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                color: colorScheme.onPrimary,
+                fontSize: 17,
+                letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
       ),
     );
   }
@@ -713,8 +892,8 @@ class _ModernInstructionDialog extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
           children: [
             // Заголовок
             Container(
@@ -731,63 +910,63 @@ class _ModernInstructionDialog extends StatelessWidget {
                   topRight: Radius.circular(24),
                 ),
               ),
-              child: Row(
-                children: [
-                  Container(
+          child: Row(
+            children: [
+              Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
+                decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
                       Icons.download,
                       color: colorScheme.onPrimary,
                       size: 24,
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
+              Expanded(
+                child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
                           isSingleApp
                               ? 'Установка автоматизации'
                               : 'Установка автоматизаций',
                           style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                             color: colorScheme.onPrimary,
-                          ),
-                        ),
+                      ),
+                    ),
                         if (isSingleApp && appName != null)
-                          Text(
+              Text(
                             'Для: $appName',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onPrimary.withOpacity(0.9),
-                            ),
+              ),
                           )
                         else if (!isSingleApp && selectedCount != null)
-                          Text(
+              Text(
                             'Выбрано: $selectedCount сервисов',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onPrimary.withOpacity(0.9),
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ],
+          ),
+        ),
 
             // Контент
             Flexible(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
                     _buildStep(
                       context,
                       '1',
@@ -836,19 +1015,19 @@ class _ModernInstructionDialog extends StatelessWidget {
             ),
 
             // Кнопки
-            Container(
+              Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
+                decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
                     color: colorScheme.outline.withOpacity(0.2),
                     width: 1,
                   ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
                       style: TextButton.styleFrom(
@@ -872,7 +1051,7 @@ class _ModernInstructionDialog extends StatelessWidget {
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.open_in_new, size: 18),
                       onPressed: () {
-                        Navigator.pop(context);
+              Navigator.pop(context);
                         _openShortcutsApp();
                       },
                       label: const Text('Открыть Команды'),
@@ -911,12 +1090,12 @@ class _ModernInstructionDialog extends StatelessWidget {
         ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
             width: 36,
             height: 36,
-            decoration: BoxDecoration(
+                decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
                   colorScheme.primary,
@@ -945,9 +1124,9 @@ class _ModernInstructionDialog extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 Row(
                   children: [
                     Icon(
@@ -966,10 +1145,10 @@ class _ModernInstructionDialog extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
         ],
       ),
     );
@@ -1009,16 +1188,13 @@ class _ModernInstructionDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          AnimatedCard(
+            AnimatedCard(
             onTap: () {
               Clipboard.setData(ClipboardData(text: url));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('URL скопирован в буфер обмена'),
-                  duration: const Duration(seconds: 2),
-                  backgroundColor: colorScheme.surface,
-                  behavior: SnackBarBehavior.floating,
-                ),
+              EnhancedToast.show(
+                context,
+                message: 'URL скопирован в буфер обмена',
+                type: ToastType.success,
               );
             },
             padding: EdgeInsets.zero,

@@ -195,8 +195,8 @@ class _ProfileDrawerState extends State<ProfileDrawer>
                   child: ListView(
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.only(
-                      top: 8,
-                      bottom: 16,
+                      top: 12,
+                      bottom: 24,
                     ),
                     children: [
                       _buildMenuItem(
@@ -302,8 +302,8 @@ class _ProfileDrawerState extends State<ProfileDrawer>
           Navigator.pop(context);
           Future.delayed(const Duration(milliseconds: 200), onTap);
         },
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         borderRadius: BorderRadius.circular(16),
         backgroundColor: Colors.transparent,
         enableHapticFeedback: true,
@@ -313,8 +313,15 @@ class _ProfileDrawerState extends State<ProfileDrawer>
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withOpacity(0.5),
+                color: colorScheme.primaryContainer.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Icon(
                 icon,

@@ -73,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _changeThemeMode(String? newThemeMode) async {
     if (newThemeMode != null) {
-      final prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
       String themeModeValue;
       if (newThemeMode == 'Светлая') {
         themeModeValue = 'light';
@@ -84,12 +84,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
       
       await prefs.setString('themeMode', themeModeValue);
-      setState(() {
+    setState(() {
         selectedThemeMode = newThemeMode;
-      });
+    });
       // Перезапускаем приложение для применения темы
       if (mounted) {
-        Phoenix.rebirth(context);
+    Phoenix.rebirth(context);
       }
     }
   }
@@ -126,7 +126,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           children: [
             AnimatedCard(
               padding: EdgeInsets.zero,
@@ -153,108 +153,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: Icons.palette_rounded,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 24),
             _buildSwitchCard(
               'AdBlock',
               'Блокировка рекламы и трекеров',
               adBlockEnabled,
               (value) => setState(() => adBlockEnabled = value),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 12),
             _buildSwitchCard(
               'Kill Switch',
               'Защита от утечки данных при обрыве VPN',
               killSwitchEnabled,
               (value) => setState(() => killSwitchEnabled = value),
             ),
-            SizedBox(height: 16),
-            GetIt.I<AuthService>().user.authStatus == AuthStatus.authorized
-                ? Align(
-                    child: ElevatedButton(
-                        onPressed: () async {
-                          bool? confirm = await showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text('Подтверждение выхода'),
-                                content: Text('Вы уверены, что хотите выйти?'),
-                                actions: <Widget>[
-                                  ElevatedButton(
-                                    child: Text('Отмена'),
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pop(); // Закрываем диалог
-                                    },
-                                  ),
-                                  ElevatedButton(
-                                    child: Text('Да'),
-                                    onPressed: () {
-                                      // Здесь вы можете добавить логику для удаления аккаунта
-                                      // Например, вызов API для удаления аккаунта
-                                      // После удаления закрываем диалог
-                                      Navigator.of(context).pop(true);
-                                      // Можно также показать сообщение об успешном удалении
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                          if (confirm == true) {
-                            await BlocProvider.of<ScreenStateBloc>(context)
-                                .logOut();
-
-                            context.pop();
-                          }
-                        },
-                        child: Text('Выйти из профиля')))
-                : Container(),
-            SizedBox(height: 16),
-            GetIt.I<AuthService>().user.authStatus == AuthStatus.authorized
-                ? Align(
-                    child: ElevatedButton(
-                        onPressed: () async {
-                          bool? confirm = await showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text('Подтверждение удаления'),
-                                content: Text(
-                                    'Вы уверены, что хотите удалить аккаунт?'),
-                                actions: <Widget>[
-                                  ElevatedButton(
-                                    child: Text('Отмена'),
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pop(); // Закрываем диалог
-                                    },
-                                  ),
-                                  ElevatedButton(
-                                    child: Text('Удалить'),
-                                    onPressed: () {
-                                      // Здесь вы можете добавить логику для удаления аккаунта
-                                      // Например, вызов API для удаления аккаунта
-                                      // После удаления закрываем диалог
-                                      Navigator.of(context).pop(true);
-                                      // Можно также показать сообщение об успешном удалении
+            const SizedBox(height: 20),
+            if (GetIt.I<AuthService>().user.authStatus == AuthStatus.authorized) ...[
+              _buildActionButton(
+                context,
+                'Выйти из профиля',
+                Icons.logout_rounded,
+                colorScheme.primary,
+                () async {
+                  final confirm = await _showModernDialog(
+                    context,
+                    title: 'Выход из профиля',
+                    message: 'Вы уверены, что хотите выйти?',
+                    confirmText: 'Выйти',
+                    confirmColor: colorScheme.primary,
+                  );
+                  if (confirm == true && mounted) {
+                    await BlocProvider.of<ScreenStateBloc>(context).logOut();
+                    if (mounted) context.pop();
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildActionButton(
+                context,
+                'Удалить аккаунт',
+                Icons.delete_outline_rounded,
+                colorScheme.error,
+                () async {
+                  final confirm = await _showModernDialog(
+                    context,
+                    title: 'Удаление аккаунта',
+                    message: 'Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.',
+                    confirmText: 'Удалить',
+                    confirmColor: colorScheme.error,
+                    isDestructive: true,
+                  );
+                  if (confirm == true && mounted) {
+                    await BlocProvider.of<ScreenStateBloc>(context).logOut();
+                    if (mounted) context.pop();
+                  }
                                     },
                                   ),
                                 ],
-                              );
-                            },
-                          );
-                          if (confirm == true) {
-                            await BlocProvider.of<ScreenStateBloc>(context)
-                                .logOut();
-                            context.pop();
-                          }
-                        },
-                        child: Text('Удалить аккаунт'),
-                        style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(Colors.red),
-                        )))
-                : Container()
           ],
         ),
       ),
@@ -267,22 +222,265 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Card(
-      elevation: 4,
+    return AnimatedCard(
+      padding: EdgeInsets.zero,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
       color: colorScheme.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: SwitchListTile(
-        title: Text(title,
-            style: TextStyle(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: SwitchListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          title: Text(
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: colorScheme.onSurface,
-            )),
-        subtitle: Text(subtitle,
+            ),
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              subtitle,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+          ),
+          value: value,
+          onChanged: onChanged,
+          activeColor: colorScheme.primary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+    BuildContext context,
+    String text,
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return AnimatedCard(
+      padding: EdgeInsets.zero,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: color,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      text,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<bool?> _showModernDialog(
+    BuildContext context, {
+    required String title,
+    required String message,
+    required String confirmText,
+    required Color confirmColor,
+    bool isDestructive = false,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Container(
+          decoration: BoxDecoration(
+      color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Заголовок
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      isDestructive ? colorScheme.error : confirmColor,
+                      (isDestructive ? colorScheme.error : confirmColor)
+                          .withOpacity(0.8),
+                    ],
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        isDestructive
+                            ? Icons.warning_rounded
+                            : Icons.info_outline_rounded,
+                        color: colorScheme.onPrimary,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Сообщение
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  message,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              // Кнопки
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: colorScheme.outline.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'Отмена',
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: confirmColor,
+                          foregroundColor: colorScheme.onPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                        ),
+                        child: Text(
+                          confirmText,
             style: TextStyle(
-              color: colorScheme.onSurface.withOpacity(0.7),
-            )),
-        value: value,
-        onChanged: onChanged,
+              fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

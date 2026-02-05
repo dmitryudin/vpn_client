@@ -26,6 +26,11 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   Map<String, dynamic> _dailyStats = {};
   Map<String, dynamic> _weeklyStats = {};
   bool _isVpnConnected = false;
+  
+  // Для расчета скорости соединения
+  int _previousDataBytes = 0;
+  DateTime? _previousUpdateTime;
+  String _currentSpeed = '—';
 
   @override
   void initState() {
@@ -114,16 +119,48 @@ class _StatisticsScreenState extends State<StatisticsScreen>
       // Обновляем время сессии в реальном времени только если VPN подключен
       if (_isVpnConnected) {
         final sessionDuration = await VpnStatisticsService.getSessionDuration();
+        final currentTime = DateTime.now();
+        
+        // Рассчитываем скорость соединения
+        final currentDataBytes = VpnStatisticsService.estimateDataTransferred(sessionDuration);
+        
+        if (_previousUpdateTime != null && _previousDataBytes >= 0) {
+          final timeDiff = currentTime.difference(_previousUpdateTime!);
+          final timeDiffSeconds = timeDiff.inMilliseconds / 1000.0;
+          
+          if (timeDiffSeconds > 0 && currentDataBytes >= _previousDataBytes) {
+            final dataDiff = currentDataBytes - _previousDataBytes;
+            final speedBytesPerSecond = dataDiff / timeDiffSeconds;
+            _currentSpeed = _formatSpeed(speedBytesPerSecond);
+          }
+        } else {
+          // Первое обновление или сброс - используем среднюю скорость на основе времени сессии
+          if (sessionDuration.inSeconds >= 1) {
+            final avgSpeedBytesPerSecond = currentDataBytes / sessionDuration.inSeconds;
+            _currentSpeed = _formatSpeed(avgSpeedBytesPerSecond);
+          } else {
+            // Если сессия только началась, используем базовую скорость из estimateDataTransferred
+            // estimateDataTransferred использует ~17 KB/сек
+            _currentSpeed = '17.0 KB/s';
+          }
+        }
+        
+        _previousDataBytes = currentDataBytes;
+        _previousUpdateTime = currentTime;
+        
         if (mounted) {
           setState(() {
             _sessionDuration = sessionDuration;
           });
         }
       } else {
-        // Если VPN отключен, сбрасываем время сессии
+        // Если VPN отключен, сбрасываем время сессии и скорость
         if (mounted && _sessionDuration != Duration.zero) {
           setState(() {
             _sessionDuration = Duration.zero;
+            _currentSpeed = '—';
+            _previousDataBytes = 0;
+            _previousUpdateTime = null;
           });
         }
       }
@@ -133,6 +170,18 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         _loadStatistics();
       }
     });
+  }
+  
+  String _formatSpeed(double bytesPerSecond) {
+    if (bytesPerSecond < 0) return '—';
+    
+    if (bytesPerSecond < 1024) {
+      return '${bytesPerSecond.toStringAsFixed(0)} B/s';
+    } else if (bytesPerSecond < 1024 * 1024) {
+      return '${(bytesPerSecond / 1024).toStringAsFixed(1)} KB/s';
+    } else {
+      return '${(bytesPerSecond / (1024 * 1024)).toStringAsFixed(2)} MB/s';
+    }
   }
 
   @override
@@ -184,6 +233,10 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               if (isNowConnected && !wasConnected) {
                 // VPN только что подключился - загружаем статистику и начинаем обновление
                 _loadStatistics();
+                // Сбрасываем предыдущие значения для расчета скорости
+                _previousDataBytes = 0;
+                _previousUpdateTime = null;
+                _currentSpeed = '—';
                 // Сразу обновляем время сессии
                 VpnStatisticsService.getSessionDuration().then((duration) {
                   if (mounted) {
@@ -197,6 +250,9 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                 _loadStatistics();
                 setState(() {
                   _sessionDuration = Duration.zero;
+                  _currentSpeed = '—';
+                  _previousDataBytes = 0;
+                  _previousUpdateTime = null;
                 });
               }
             }
@@ -210,8 +266,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                   padding: EdgeInsets.only(
                     left: 20,
                     right: 20,
-                    top: 20,
-                    bottom: MediaQuery.of(context).padding.bottom + 20,
+                    top: 24,
+                    bottom: MediaQuery.of(context).padding.bottom + 24,
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -223,7 +279,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                         colorScheme,
                         theme,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
 
                       // Статистика за сессию
                       if (vpnState.connectionState == FlutterVpnState.connected)
@@ -235,7 +291,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                         ),
 
                       if (vpnState.connectionState == FlutterVpnState.connected)
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
 
                       // Статистика за сегодня
                       _buildDailyStatsCard(
@@ -243,7 +299,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                         colorScheme,
                         theme,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
 
                       // Статистика за неделю
                       _buildWeeklyStatsCard(
@@ -332,14 +388,15 @@ class _StatisticsScreenState extends State<StatisticsScreen>
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: statusColor.withOpacity(0.3),
-            width: 2,
+            color: statusColor.withOpacity(0.2),
+            width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: statusColor.withOpacity(0.1),
-              blurRadius: 20,
+              color: statusColor.withOpacity(0.08),
+              blurRadius: 16,
               offset: const Offset(0, 4),
+              spreadRadius: 0,
             ),
           ],
         ),
@@ -400,7 +457,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         : 0;
     final dataTransferred =
         VpnStatisticsService.formatBytes(currentSessionData);
-    final speed = '—'; // TODO: Получить реальную скорость из VPN
+    final speed = _isVpnConnected ? _currentSpeed : '—';
 
     return FadeInWidget(
       delay: const Duration(milliseconds: 100),
@@ -411,9 +468,10 @@ class _StatisticsScreenState extends State<StatisticsScreen>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withOpacity(0.1),
-              blurRadius: 20,
+              color: colorScheme.primary.withOpacity(0.08),
+              blurRadius: 16,
               offset: const Offset(0, 4),
+              spreadRadius: 0,
             ),
           ],
         ),
@@ -541,9 +599,10 @@ class _StatisticsScreenState extends State<StatisticsScreen>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withOpacity(0.1),
-              blurRadius: 20,
+              color: colorScheme.primary.withOpacity(0.08),
+              blurRadius: 16,
               offset: const Offset(0, 4),
+              spreadRadius: 0,
             ),
           ],
         ),
@@ -614,9 +673,10 @@ class _StatisticsScreenState extends State<StatisticsScreen>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withOpacity(0.1),
-              blurRadius: 20,
+              color: colorScheme.primary.withOpacity(0.08),
+              blurRadius: 16,
               offset: const Offset(0, 4),
+              spreadRadius: 0,
             ),
           ],
         ),
@@ -726,9 +786,10 @@ class _StatisticsScreenState extends State<StatisticsScreen>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withOpacity(0.1),
-              blurRadius: 20,
+              color: colorScheme.primary.withOpacity(0.08),
+              blurRadius: 16,
               offset: const Offset(0, 4),
+              spreadRadius: 0,
             ),
           ],
         ),

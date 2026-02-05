@@ -69,6 +69,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       await Future.delayed(const Duration(milliseconds: 500));
                     },
                     color: colorScheme.primary,
+                    backgroundColor: colorScheme.surface,
+                    strokeWidth: 3,
+                    displacement: 40,
                     child: CustomScrollView(
                       physics: const AlwaysScrollableScrollPhysics(
                         parent: BouncingScrollPhysics(),
@@ -77,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         SliverFillRemaining(
                           hasScrollBody: false,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -85,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 delay: const Duration(milliseconds: 100),
                                 child: const EnhancedVpnButton(),
                               ),
-                              const SizedBox(height: 48),
+                              const SizedBox(height: 40),
                               FadeInWidget(
                                 delay: const Duration(milliseconds: 200),
                                 child: const EnhancedServerList(),
@@ -130,22 +133,22 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Индикатор статуса VPN
               Container(
-                width: 8,
-                height: 8,
+                width: 10,
+                height: 10,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: _getStatusColor(vpnState.connectionState, colorScheme),
                   boxShadow: [
                     BoxShadow(
                       color: _getStatusColor(vpnState.connectionState, colorScheme)
-                          .withOpacity(0.5),
-                      blurRadius: 8,
+                          .withOpacity(0.4),
+                      blurRadius: 10,
                       spreadRadius: 2,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Text(
                 _getStatusText(vpnState.connectionState),
                 style: theme.textTheme.titleMedium?.copyWith(
